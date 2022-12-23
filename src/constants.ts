@@ -1,50 +1,87 @@
 export const labels = {
-  FIRST: '先頭',
-  LAST: '最終',
-  NEXT: '次へ',
-  PREVIOUS: '前へ',
+    FIRST: 'First',
+    LAST: 'Last',
+    NEXT: 'Next',
+    PREVIOUS: 'Previous',
 };
 
 export const messageTypes = {
-  error: 'error',
-  info: 'info',
-  success: 'success',
+    error: 'error',
+    info: 'info',
+    success: 'success',
 };
 
 export const titleMessageError = {
-  NOT_FOUND: 'TITLE NOT FOUND',
-  INTERNAL_SERVER_ERROR: 'ページエラー',
-  FORBIDDEN: '権限エラー',
+    NOT_FOUND: 'TITLE NOT FOUND',
+    INTERNAL_SERVER_ERROR: 'Internal Server Error',
+    FORBIDDEN: 'Forbidden, access denied.',
 };
 
 export interface IMessage {
-  // tslint:disable-next-line:no-reserved-keywords
-  type: string;
-  content: string;
+    // tslint:disable-next-line:no-reserved-keywords
+    type: string;
+    content: string;
 }
 
 export const valueLst = {
-  // 無効化フラグ
-  disableFlgs: {
-    0: '有効',
-    1: '無効',
-  },
+    // disable flag
+    disableFlgs: {
+        0: 'Valid',
+        1: 'Invalid',
+    },
 };
 
 export const messages = {
-  CSVDefault:'フォーマットのヘッダーに不必要なデータもしくは項目名の書き換えがございますとエラーになりますのでご注意ください。',
-  ECL001: (column: string) => `${column}は必須項目です。`,
-  FORBIDDEN: `アクセス権限がありません。<br/> 大変お手数ですが、システム管理者までご連絡ください。`,
-  INTERNAL_SERVER_ERROR: `申し訳ございません。<br/> お客様がアクセスしようとしたページが見つかりませんでした。<br/>
-  サイト更新などによってURLが変更になったか、URLが正しく入力されていない可能性があります。<br/>
-  ブラウザの再読込を行ってもこのページが表示される場合は、システム管理者にご連絡ください。`,
-  ECL034: (param: string) => `${param}に不正な値が入力または選択されています。`,
-  API_SELECT_ERROR: (code: string) => `該当の情報が存在しません。(APIレスポンス：<${code}>)`,
-  API_UPDATE_ERROR: (code: string) => `サーバーエラーが発生しました。データをご確認の上、再度登録をお願いいたします。(APIレスポンス：<${code}>)`,
-  ECL054: 'CSV作成処理の呼び出しに失敗しました。',
-  NOT_FOUND: 'NOT FOUND',
-  BAD_REQUEST: 'BAD REQUEST',
-  ECL056: 'セッションにデータが存在しません。',
-  ECL057: 'データの登録に失敗しました。',
+    CSVDefault: 'Please note that an error will occur if there is unnecessary data or rewriting of item names in the header of the format.',
+    ECL001: (column: string) => `${column} is a required item.`,
+    FORBIDDEN: `Forbidden, access denied.`,
+    INTERNAL_SERVER_ERROR: `I'm sorry. <br/> The page you were trying to access could not be found. <br/>
+    The URL may have changed due to site updates, or the URL may not have been entered correctly. <br/>
+    If this page is still displayed after reloading the browser, please contact your system administrator.`,
+    ECL034: (param: string) => `An invalid value has been entered or selected for ${param}.`,
+    API_SELECT_ERROR: (code: string) => `Corresponding information does not exist. (API response: <${code}>)`,
+    API_UPDATE_ERROR: (code: string) => `A server error has occurred. Please check the data and register again. (API response: <${code}>)`,
+    ECL054: 'Failed to call the CSV creation process.',
+    NOT_FOUND: 'NOT FOUND',
+    BAD_REQUEST: 'BAD REQUEST',
+    ECL056: 'No data in session.',
+    ECL057: 'Failed to register data.',
 };
 
+// tri - my own custom constants - START
+export const errMsg = {
+    ERR001: (column: string) => {
+        return `${column.toUpperCase()} is required!`;
+    },
+    ERR002: (column: string, minLength: number, maxLength: number) => {
+        return `${column.toUpperCase()} should be more than ${minLength}, less than equal to ${maxLength} characters`;
+    },
+    ERR003: (email: string) => {
+        return `${email.toUpperCase()} is invalid!`;
+    },
+    ERR004: (field1: string, field2: string) => {
+        return `${field1.toUpperCase()} must match ${field2}`;
+    },
+    ERR005: (field: string, min: number) => {
+        return `${field.toUpperCase()} should be bigger than ${min} characters`;
+    },
+    ERR006: (field: string, max: number) => {
+        return `${field.toUpperCase()} should be less than equal to ${max} characters`;
+    },
+    ERR007: (field: string, type: string) => {
+        return `${field.toUpperCase()} is not of type ${type.toLowerCase()}`;
+    },
+};
+
+export const _1MB = 1024 * 1024;
+
+export const _1GB = _1MB * 1024;
+
+export const ROLE = {
+    USER: 1,
+    ADMIN: 2,
+    MANAGER: 3,
+};
+
+export const ROLES = Object.values(ROLE);
+// tri - my own custom constants - END

@@ -1,51 +1,62 @@
-import {Entity, Column} from 'typeorm';
-import {Base} from './base';
+import { Base } from './base';
+import { Entity, Column } from "typeorm";
+import { IsEmail, IsNotEmpty, MaxLength, MinLength, IsOptional, IsNotIn } from "class-validator";
+import { errMsg } from '../constants';
 
 export enum UserRole {
-  ADMIN = 1,
-  // SALES = 2,
-  // STAFF = 3
+  USER = 1,
+  ADMIN = 2,
+  MANAGER = 3
 }
 
 /**
  * Model definition
  */
 @Entity({
-  name: 'user',
+  name: 'users',
   synchronize: false,
   orderBy: {
     id: 'DESC',
   },
 })
 export class User extends Base {
-  @Column({
-    type: 'varchar',
-    length: 255,
-    name: 'username',
-  })
-  username: string;
+  @Column({ type: "int", name: "company_id" })
+  companyId!: number;
 
-  @Column({
-    type: 'varchar',
-    length: 100,
-    name: 'name',
+  @Column({ type: "nvarchar", length: 100 })
+  @IsNotEmpty({
+    message: errMsg.ERR001('name')
   })
-  name: string;
+  @MaxLength(100, {
+    message: errMsg.ERR006('name', 100)
+  })
+  name!: string;
 
-  @Column({
-    type: 'varchar',
-    length: 255,
+  @Column({ type: "nvarchar", length: 255 })
+  @IsNotEmpty({
+    message: errMsg.ERR001('username')
   })
-  password: string;
+  @MaxLength(255, {
+    message: errMsg.ERR006('username', 255)
+  })
+  username!: string;
+
+  @Column({ type: "nvarchar", length: 255 })
+  @IsOptional()
+  @MinLength(6, { message: errMsg.ERR005('password', 6) })
+  @MaxLength(20, { message: errMsg.ERR006('password', 20) })
+  password!: string;
+
+  @Column({ type: "nvarchar", length: 255 })
+  @IsEmail({}, { message: errMsg.ERR003('email') })
+  email!: string;
 
   @Column({
     type: 'enum',
     enum: UserRole,
   })
-  role: UserRole;
-
-  @Column({
-    name: 'last_login',
-  })
-  lastLogin?: string;
+  @IsNotIn(['1', '2', '3', 1, 2, 3],
+    { message: errMsg.ERR003('role') }
+  )
+  role!: UserRole;
 }

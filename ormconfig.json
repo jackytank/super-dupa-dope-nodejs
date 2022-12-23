@@ -1,20 +1,14 @@
 {
-  "type": "mysql",
-  "host": "",
-  "port": 3306,
-  "username": "",
-  "password": "",
-  "database": "",
-  "synchronize": false,
-  "logging": false,
-  "entities": [
-    "dist/entities/*.entity.js"
-  ],
-  "migrations": [
-    "dist/migrations/*.js"
-  ],
-  "subscribers": [
-    "dist/subscribers/*.js"
-  ],
-  "cli": { "migrationsDir": "src/migrations" }
+    "type": "mysql",
+    "host": "",
+    "port": 3306,
+    "username": "",
+    "password": "",
+    "database": "",
+    "synchronize": false,
+    "logging": false,
+    "entities": ["dist/entities/*.entity.js"],
+    "migrations": ["dist/migrations/*.js"],
+    "subscribers": ["dist/subscribers/*.js"],
+    "cli": { "migrationsDir": "src/migrations" }
 }

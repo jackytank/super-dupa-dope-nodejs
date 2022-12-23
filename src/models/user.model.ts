@@ -1,6 +1,9 @@
-export class UserModel {
-  id: number;
-  role: number;
-  userName: string;
-  name: string;
+import { BaseModel } from './base.model';
+
+export class UserModel extends BaseModel {
+    role: number | string;
+    username: string;
+    name: string;
+    password: string;
+    email: string;
 }
