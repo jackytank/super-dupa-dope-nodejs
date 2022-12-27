@@ -192,18 +192,18 @@ $(function() {
             function(value, el) {
                 // const fileSize = element.size / 1024 / 1024 // in megabytes - mb
                 // iSize = (Math.round(iSize * 100) / 100)
-                // let file = el.files[0]
-                // let fileSize = file.size // in bytes
-                // let fileExt = file.name.substring(file.name.lastIndexOf('.') + 1, file.name.length) || file.name; // ex: csv | txt | docx | doc
-                // console.log('file ext', fileExt);
-                // console.log('file size: ', fileSize);
-                // // check if file size is bigger than 2mb
-                // if (fileSize > 2097152) {
-                //     return false
-                // }
-                // if (fileExt !== 'csv') {
-                //     return false
-                // }
+                const file = el.files[0]
+                const fileSize = file.size // in bytes
+                const fileExt = file.name.substring(file.name.lastIndexOf('.') + 1, file.name.length) || file.name; // ex: csv | txt | docx | doc
+                console.log('file ext', fileExt);
+                console.log('file size: ', fileSize);
+                // check if file size is bigger than 2mb
+                if (fileSize > 2097152) {
+                    return false
+                }
+                if (fileExt !== 'csv') {
+                    return false
+                }
                 return true;
             },
             '',
@@ -269,7 +269,15 @@ $(function() {
                         console.log('Return data: ', JSON.stringify(data, null, 4));
                     },
                     error: function(req, stat, err) {
-                        openErrorModalWithMsg('errorModal', 'errorModalMessage', 'errorModalOkBtn', req.statusText || req.responseJSON.status, req.responseJSON.message, req.responseJSON.messages);
+                        console.log(req);
+                        openErrorModalWithMsg(
+                            'errorModal',
+                            'errorModalMessage',
+                            'errorModalOkBtn',
+                            req.statusText || req.responseJSON.status,
+                            req.responseJSON.message,
+                            req.responseJSON.messages,
+                        );
                     },
                 });
             } else {

@@ -23,7 +23,6 @@ class AdminUserController {
         const flashMessage = req.flash('message')[0];
         const dataBack = req.flash('dataBack')[0];
         res.render('admin/users/add', {
-            layout: 'layout/addLayout',
             dataBack: dataBack ?? {},
             message: flashMessage
         });

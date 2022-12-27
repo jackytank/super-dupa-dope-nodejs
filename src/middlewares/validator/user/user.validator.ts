@@ -42,7 +42,6 @@ export const userExpressValidationRule = (hasRetype: boolean) => {
             .trim()
             .escape(),
         body('role')
-            .not()
             .isEmpty()
             .withMessage(errMsg.ERR001('role')),
     ];

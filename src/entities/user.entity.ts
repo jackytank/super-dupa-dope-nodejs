@@ -1,6 +1,6 @@
 import { Base } from './base';
 import { Entity, Column } from "typeorm";
-import { IsEmail, IsNotEmpty, MaxLength, MinLength, IsOptional, IsNotIn } from "class-validator";
+import { IsEmail, IsNotEmpty, MaxLength, MinLength, IsOptional, IsNotIn, IsIn } from "class-validator";
 import { errMsg } from '../constants';
 
 export enum UserRole {
@@ -52,11 +52,12 @@ export class User extends Base {
   email!: string;
 
   @Column({
-    type: 'enum',
-    enum: UserRole,
+    type: 'tinyint',
+    // enum: UserRole,
   })
-  @IsNotIn(['1', '2', '3', 1, 2, 3],
+  // Ex: [1, 2, 3, '1', '2', '3']
+  @IsIn(Object.values(UserRole).concat(Object.values(UserRole).map((n) => n + "")),
     { message: errMsg.ERR003('role') }
   )
-  role!: UserRole;
+  role!: number;
 }

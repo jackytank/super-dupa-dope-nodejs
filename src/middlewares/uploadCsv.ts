@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request } from 'express';
 import multer, { FileFilterCallback } from 'multer';
 import path from 'path';
 import { DestinationCallback } from '../customTypings/express';

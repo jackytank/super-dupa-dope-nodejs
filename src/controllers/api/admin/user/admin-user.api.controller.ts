@@ -216,6 +216,7 @@ class AdminUserApiController {
                             continue;
                         }
                         user.password = getRandomPassword();
+                        user.createdBy = req.session.user?.username as string;
                         dbData.push(user); // push to dbData to check unique later
                         insertArr.push(user); // push to map to insert later
                     } else {
@@ -236,6 +237,8 @@ class AdminUserApiController {
                                     );
                                     continue;
                                 }
+                                user.updatedAt = new Date();
+                                user.updatedBy = req.session.user?.username as string;
                                 dbData.splice(
                                     dbData.indexOf(result.data as User),
                                     1,

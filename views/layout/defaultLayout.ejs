@@ -39,7 +39,19 @@
         <%- body %>
     </main>
 
+    <% (message) {%>
+    <!-- modal id: #errorModal -->
+    <%- include('../common/modal/errorModal', {message:''}) %>
+    <!-- active errorModal if message exist -->
+    <script>
+        const errorModal = document.querySelector('#errorModal');
+        const modal = new mdb.Modal(errorModal);
+        modal.show()
+    </script>
+    <% } %>
+
     <%- include('./defaultScripts') %>
+
 
 </body>
 

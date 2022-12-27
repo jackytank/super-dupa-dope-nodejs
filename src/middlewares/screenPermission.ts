@@ -58,7 +58,7 @@ function allow(options: {
             }
         }
         if (userRole && options.roles.includes(userRole)) {
-            next(); // role is allowed, so continue on the next middleware
+            next();
             return;
         } else {
             logger.logWarning(req, messages.FORBIDDEN);

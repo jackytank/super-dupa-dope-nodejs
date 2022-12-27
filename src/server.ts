@@ -17,13 +17,13 @@ moment.tz.setDefault('Asia/Tokyo');
 
 const app = express();
 
-app.use(flash());
-app.use(cors());
 app.set('views', `${__dirname}/../views`);
 app.set('view engine', 'ejs');
 app.use(expressEjsLayouts);
 app.set('layout extractScripts', true);
 app.set('layout', 'layout/defaultLayout');
+app.use(flash());
+app.use(cors());
 app.use(favicon(`${__dirname}/../public/favicon.ico`));
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(

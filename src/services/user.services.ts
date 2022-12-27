@@ -17,9 +17,7 @@ export class UserService {
     private userRepo = AppDataSource.getRepository(User);
 
     async verifyCredentials(username: string, password: string) {
-        const foundUser = await this.userRepo.findOne({
-            where: { username: username },
-        });
+        const foundUser = await this.userRepo.findOneBy({ username: username });
 
         if (!foundUser) {
             return null;
