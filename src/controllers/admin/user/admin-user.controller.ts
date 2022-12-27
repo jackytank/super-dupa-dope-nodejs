@@ -22,7 +22,11 @@ class AdminUserController {
     async addPage(req: Request, res: Response) {
         const flashMessage = req.flash('message')[0];
         const dataBack = req.flash('dataBack')[0];
-        res.render('admin/users/add', { dataBack: dataBack ?? {}, message: flashMessage });
+        res.render('admin/users/add', {
+            layout: 'layout/addLayout',
+            dataBack: dataBack ?? {},
+            message: flashMessage
+        });
     }
     async createNewUser(req: Request, res: Response) {
         const queryRunner = AppDataSource.createQueryRunner();
@@ -98,11 +102,11 @@ class AdminUserController {
     async listPage(req: Request, res: Response) {
         const flashMessage = req.flash('message')[0];
         const userRole = req.session?.user?.role;
-        res.render('user/list', {
-            // layout: 'layout/user/listLayout',
+        res.render('admin/users/list', {
+            layout: 'layout/listLayout',
             queryBack: {},
             dayjs: dayjs,
-            message: flashMessage
+            message: flashMessage ?? '',
         });
     }
     async changePassword(req: Request, res: Response) {

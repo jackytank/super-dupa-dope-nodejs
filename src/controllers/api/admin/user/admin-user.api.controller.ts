@@ -2,8 +2,6 @@ import { Request, Response } from 'express';
 import _ from 'lodash';
 import * as csv from 'csv-parse';
 import {
-    getConnection,
-    getCustomRepository,
     SelectQueryBuilder,
 } from 'typeorm';
 import { validate, ValidationError } from 'class-validator';
@@ -69,7 +67,7 @@ class AdminUserApiController {
         return res.status(result.status as number).json(result);
     }
     async save(req: Request, res: Response) {
-        const queryRunner = getConnection().createQueryRunner();
+        const queryRunner = AppDataSource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
         const { name, username, password, email, role } = req.body;
@@ -87,7 +85,7 @@ class AdminUserApiController {
         return res.status(200).json(result);
     }
     async update(req: Request, res: Response) {
-        const queryRunner = getConnection().createQueryRunner();
+        const queryRunner = AppDataSource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
         const { name, username, password, email, role } = req.body;
@@ -111,7 +109,7 @@ class AdminUserApiController {
         return res.status(result.status as number).json(result);
     }
     async importCsv(req: Request, res: Response) {
-        const queryRunner = getConnection().createQueryRunner();
+        const queryRunner = AppDataSource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
         const msgObj: CustomApiResult<User> = { messages: [], status: 500 };

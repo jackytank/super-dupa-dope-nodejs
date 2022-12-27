@@ -16,7 +16,7 @@ const router = Router();
 router.use(sessionMiddleWare);
 router.use(userMiddleware);
 router.use('/', authRouter);
-router.use(auth);
+// router.use(auth);
 router.use(viewHelper);
 
 router.get('/', (req, res) => {

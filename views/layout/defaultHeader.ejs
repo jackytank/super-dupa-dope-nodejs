@@ -1,26 +1,88 @@
 <!-- Header -->
 <header>
-    <div id="header">
-        <header class="navbar navbar-expand-md fixed-top">
-            <div class="user-info d-none d-lg-flex align-items-center ml-3 item-icon-header">
-                <div class="ml-15px text-header header-username">
-                    <% if (loginUser.name) { %>
-                    <ul class="navbar-nav">
-                        <li class="dropdown cursor-pointer">
-                            <a id="navbarDropdownUser" data-toggle="dropdown">
-                                <%= loginUser.name %>
-                            </a>
-                            <div class="dropdown-menu" aria-labelledby="navbarDropdownUser" style="padding: 5px 7px !important; min-width: 0 !important;">
-                                <a href="/logout?redirect=<%= logoutRedirect %>" type="button" class="button btn-logout" style="color: #BF474D;margin-right: 0;">Logout</a>
-                            </div>
+    <nav id="main-navbar" class="navbar navbar-expand-lg navbar-light bg-white fixed-top">
+        <!-- Container wrapper -->
+        <div class="container-fluid">
+            <!-- Toggle button -->
+            <button class="navbar-toggler" type="button" data-mdb-toggle="collapse" data-mdb-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <!-- Brand -->
+            <a class="navbar-brand" href="/">
+                <img src="https://mdbootstrap.com/img/logo/mdb-transaprent-noshadows.png" height="25" alt="" loading="lazy" />
+            </a>
+            <!-- Search form -->
+            <form class="d-none d-md-flex input-group w-auto my-auto">
+                <input autocomplete="off" type="search" class="form-control rounded" placeholder='Search (ctrl + "/" to focus)' style="min-width: 225px" />
+                <span class="input-group-text border-0"><i class="fas fa-search"></i></span>
+            </form>
+
+            <!-- Right links -->
+            <ul class="navbar-nav ms-auto d-flex flex-row">
+                <!-- Notification dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link me-3 me-lg-0 dropdown-toggle hidden-arrow" href="#" id="navbarDropdownMenuLink" role="button" data-mdb-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge rounded-pill badge-notification bg-danger">1</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
+                        <li><a class="dropdown-item" href="#">Some news</a></li>
+                        <li><a class="dropdown-item" href="#">Another news</a></li>
+                        <li>
+                            <a class="dropdown-item" href="#">Something else</a>
                         </li>
                     </ul>
-                    <% } else { %>
-                    <a href="/login" style="color: #01a2e7; line-height: 40px; text-decoration: none;">Login</a>
-                    <% } %>
-                </div>
-            </div>
-        </header>
+                </li>
 
-    </div>
+                <!-- Icon -->
+                <li class="nav-item">
+                    <a class="nav-link me-3 me-lg-0" href="#">
+                        <i class="fas fa-fill-drip"></i>
+                    </a>
+                </li>
+                <!-- Icon -->
+                <li class="nav-item me-3 me-lg-0">
+                    <a class="nav-link" href="#">
+                        <i class="fab fa-github"></i>
+                    </a>
+                </li>
+
+                <!-- Icon dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link me-3 me-lg-0 dropdown-toggle hidden-arrow" href="#" id="navbarDropdown" role="button" data-mdb-toggle="dropdown" aria-expanded="false">
+                        <i class="united kingdom flag m-0"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                        <li>
+                            <a class="dropdown-item" href="#"><i class="united kingdom flag"></i>English
+                                <i class="fa fa-check text-success ms-2"></i></a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider" />
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="#"><i class="poland flag"></i>Polski</a>
+                        </li>
+                        
+                    </ul>
+                </li>
+                        
+                <!-- Avatar -->
+                <li class="nav-item dropdown">
+                    <% if(loginUser.name){ %>
+                    <a class="nav-link dropdown-toggle hidden-arrow d-flex align-items-center" href="#" id="navbarDropdownMenuLink" role="button" data-mdb-toggle="dropdown" aria-expanded="false">
+                        <span class="me-2"><%= loginUser.username %></span> <img src="https://mdbootstrap.com/img/Photos/Avatars/img (31).jpg" class="rounded-circle me-2" height="22" alt="" loading="lazy" />
+                        <span id="userAuthority" data-authority="<%= loginUser.role %> ">Role: <%= loginUser.role %> </span>
+                        <span id="user-id" data-userid="<%= loginUser.id %>"></span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
+                        <li><a class="dropdown-item" href="/logout?redirect=<%= logoutRedirect %> ">Logout</a></li>
+                    </ul>
+                    <% } %>
+                </li>
+            </ul>
+        </div>
+        <!-- Container wrapper -->
+    </nav>
 </header>

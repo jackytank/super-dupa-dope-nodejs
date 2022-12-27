@@ -1,0 +1,55 @@
+<div class="container pt-4">
+    <section class="mb-4">
+        <div class="card">
+            <div class="card-header py-3">
+                <h5 class="mb-0 text-center"><strong>ADD USER</strong></h5>
+            </div>
+        </div>
+        <!-- <div class="card-footer d-flex mb-3 justify-content-center">
+            <div class="btn-group">
+                <a href="/admin/users/export-pdf" class="btn btn-secondary">PDF</a>
+                <a href="/admin/users/export-excel" class="btn btn-secondary">EXCEL</a>
+                <a href="/admin/users/export-csv" class="btn btn-secondary">CSV</a>
+            </div>
+        </div> -->
+    </section>
+
+    <div class="container">
+        <form id="addUserForm" method="POST" action="/admin/users/addPage">
+            <div class="row mb-4">
+                <div class="col-md-6 col-sm-12">
+                    <label for="">Name:</label>
+                    <input type="text" id="form6Example1" class="form-control" name="name" placeholder="Name" <%=dataBack.name?`value=${dataBack.name}` : `` %> />
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <label for="">Username:</label>
+                    <input type="text" id="form6Example2" class="form-control" name="username" placeholder="Username" <%=dataBack.username? `value=${dataBack.username}` : `` %> />
+                </div>
+            </div>
+            <div class="row mb-4">
+                <div class="col-md-6 col-sm-12">
+                    <label for="">Password:</label>
+                    <input type="password" id="password" class="form-control" name="password" placeholder="Password" />
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <label for="">Retype:</label>
+                    <input type="password" id="retype" class="form-control" name="retype" placeholder="Retype" />
+                </div>
+            </div>
+            <div class="mb-4">
+                <label for="">Email:</label>
+                <input type="email" id="email" class="form-control" name="email" placeholder="Email" <%=dataBack.email?`value=${dataBack.email}` : ``%> />
+            </div>
+            <div class="mb-4">
+                <label for="selectRole">Role: </label>
+                <select name="role" class="" id="selectRole">
+                    <option value="1" <%=dataBack.role===1? 'selected' :'' %>>1 - User</option>
+                    <option value="2" <%=dataBack.role===2? 'selected' :'' %>>2 - Admin</option>
+                    <option value="3" <%=dataBack.role===3? 'selected' :'' %>>3 - Manager</option>
+                </select>
+            </div>
+            <!-- Submit button -->
+            <button type="submit" class="btn btn-primary btn-block mb-4" id="submitBtn">CREATE</button>
+        </form>
+    </div>
+</div>

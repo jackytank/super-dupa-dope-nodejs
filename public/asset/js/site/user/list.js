@@ -3,6 +3,15 @@ $(function() {
     /**
      * Page load
      */
+    const usersTableElement = $('#usersTable');
+    const getUserRole = parseInt(document.querySelector('#userAuthority')?.dataset?.authority);
+    const getUserId = $('#user-id')?.dataset?.userid;
+    // for import, export csv
+    const importCsvFormEl = $('#importCsvForm');
+    const importCsvInputEl = $('#importCsvInput');
+    const importCsvBtnEl = $('#importCsvBtn');
+    const importCsvFileSizeEl = $('#fileSize');
+
     $(document).ready(function() {
         init();
         events();
@@ -13,15 +22,6 @@ $(function() {
      */
     // init - START
     function init() {
-        const usersTableElement = $('#usersTable');
-        const getUserRole = parseInt(document.querySelector('#userAuthority').dataset.authority);
-        const getUserId = document.querySelector('#user-id').dataset.userid;
-        // for import, export csv
-        const importCsvFormEl = $('#importCsvForm');
-        const importCsvInputEl = $('#importCsvInput');
-        const importCsvBtnEl = $('#importCsvBtn');
-        const importCsvFileSizeEl = $('#fileSize');
-
         const table = usersTableElement.DataTable({
             ordering: false,
             searching: false,
@@ -108,30 +108,30 @@ $(function() {
                     },
                 },
                 {
-                    data: 'created_at',
+                    data: 'createdAt',
                     render: function(data, type, row, meta) {
                         return data ? dayjs(data).format('DD/MM/YYYY HH:mm:ss') : '';
                     },
                 },
                 {
-                    data: 'created_by',
+                    data: 'createdBy',
                     className: 'limit-char',
                 },
                 {
-                    data: 'updated_at',
+                    data: 'updatedAt',
                     render: function(data, type, row, meta) {
                         return data ? dayjs(data).format('DD/MM/YYYY HH:mm:ss') : '';
                     },
                 },
                 {
-                    data: 'updated_by',
+                    data: 'updatedBy',
                     className: 'limit-char',
                 },
                 {
                     data: null,
                     render: function(data, type, row, meta) {
                         const userId = data.id;
-                        console.log('typeof userID', typeof getUserId);
+                        // console.log('typeof userID', typeof getUserId);
                         console.log(getUserId);
                         const isEditDisabled = getUserRole === 1 ? (Number(getUserId) === data.id ? '' : 'disabled') : '';
                         // if authority is 1 (User) then disable edit button except for himself (id matches)
@@ -149,18 +149,6 @@ $(function() {
     }
     // events - START
     function events() {
-        // for index .No column
-        // table.on('order.dt search.dt draw.dt', function() {
-        //     table.column(0, {
-        //         search: 'applied',
-        //         order: 'applied'
-        //     }).nodes().each(function(cell, i) {
-        //         // plus 1 first because it start at 0
-        //         const index = table.page.info().start + 1
-        //         cell.innerHTML = index + i++;
-        //     });
-        // }).draw();
-
         // if click del button then call ajax delete request
         $(document).on('click', '#delUserBtn', function() {
             const userId = $(this).attr('data-user-id');
