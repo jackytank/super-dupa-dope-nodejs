@@ -8,9 +8,10 @@ import favicon from 'serve-favicon';
 import errorHandler from './middlewares/errorHandler';
 import router from './routes';
 import * as moment from 'moment-timezone';
-import './connection';
+import './DataSource';
 import flash from 'connect-flash';
 import cors from 'cors';
+import { User } from './entities/user.entity';
 
 moment.tz.setDefault('Asia/Tokyo');
 
@@ -51,4 +52,4 @@ app.use(router);
 app.use(errorHandler);
 app.set('trust proxy', true);
 
-export = app;
+export default app;

@@ -9,7 +9,7 @@ import {
 import { validate, ValidationError } from 'class-validator';
 import { stringify } from 'csv-stringify';
 import dayjs from 'dayjs';
-import { UserRepository } from '../../../../repositories/user.repository';
+import { UserService } from '../../../../services/user.services';
 import {
     CustomApiResult,
     CustomValidateResult,
@@ -17,6 +17,7 @@ import {
 import { User } from '../../../../entities/user.entity';
 import { bench, getRandomPassword } from '../../../../utils/common';
 import { UserModel } from '../../../../models/user.model';
+import { AppDataSource } from '../../../../DataSource';
 
 interface CsvUserData {
     id: unknown;
@@ -28,7 +29,8 @@ interface CsvUserData {
 }
 
 class AdminUserApiController {
-    private userRepo = getCustomRepository(UserRepository);
+    private userRepo = AppDataSource.getRepository(User);
+    private userService = new UserService();
 
     constructor() {
         this.getAll = this.getAll.bind(this);
@@ -46,11 +48,11 @@ class AdminUserApiController {
         const { take, limit, companyId } = req.query;
         let result: CustomApiResult<User>;
         if (companyId) {
-            result = await this.userRepo.getAllDataWithExtraPersonalInfo(
+            result = await this.userService.getAllDataWithExtraPersonalInfo(
                 req.query,
             );
         } else {
-            result = await this.userRepo.getAllData(
+            result = await this.userService.getAllData(
                 take as string,
                 limit as string,
             );
@@ -60,10 +62,10 @@ class AdminUserApiController {
     async search(req: Request, res: Response) {
         // save req.query to session for export csv based on search query
         req.session.searchQuery = req.query;
-        return res.status(200).json(await this.userRepo.searchData(req.query));
+        return res.status(200).json(await this.userService.searchData(req.query));
     }
     async getOne(req: Request, res: Response) {
-        const result = await this.userRepo.getOneData(parseInt(req.params.id));
+        const result = await this.userService.getOneData(parseInt(req.params.id));
         return res.status(result.status as number).json(result);
     }
     async save(req: Request, res: Response) {
@@ -78,7 +80,7 @@ class AdminUserApiController {
             email,
             role,
         });
-        const result = await this.userRepo.insertData(user, null, queryRunner, {
+        const result = await this.userService.insertData(user, null, queryRunner, {
             wantValidate: false,
             isPasswordHash: true,
         });
@@ -98,14 +100,14 @@ class AdminUserApiController {
             email,
             role,
         });
-        const result = await this.userRepo.updateData(user, null, queryRunner, {
+        const result = await this.userService.updateData(user, null, queryRunner, {
             wantValidate: false,
         });
         return res.status(result.status as number).json(result);
     }
     async remove(req: Request, res: Response) {
         const id = parseInt(req.params.id);
-        const result = await this.userRepo.removeData(id);
+        const result = await this.userService.removeData(id);
         return res.status(result.status as number).json(result);
     }
     async importCsv(req: Request, res: Response) {
@@ -128,7 +130,7 @@ class AdminUserApiController {
                 skip_empty_lines: true, // bỏ qua các dòng trống
                 columns: true, // gán header cho từng column trong row
             });
-            const records: unknown[] = await this.userRepo.readCsvData(
+            const records: unknown[] = await this.userService.readCsvData(
                 req.file.path,
                 parser,
             );
@@ -173,8 +175,8 @@ class AdminUserApiController {
                             row['id'] === ''
                                 ? null
                                 : _.isString(row['id'])
-                                ? parseInt(row['id'])
-                                : row['id'],
+                                    ? parseInt(row['id'])
+                                    : row['id'],
                         name: row['name'] === '' ? null : row['name'],
                         username:
                             row['username'] === '' ? null : row['username'],
@@ -205,7 +207,7 @@ class AdminUserApiController {
                             // deleted="y" và colum id không có nhập thì không làm gì hết, ngược lại sẽ xóa row theo id tương ứng dưới DB trong bảng user
                             continue;
                         }
-                        const result: CustomValidateResult<User> = await this.userRepo.checkUsernameEmailUnique(
+                        const result: CustomValidateResult<User> = await this.userService.checkUsernameEmailUnique(
                             user,
                             dbData,
                         );
@@ -226,7 +228,7 @@ class AdminUserApiController {
                                 dbData.splice(dbData.indexOf(findUser), 1); // remove from dbData to check unique later
                                 deleteArr.push(findUser); // push to map to delete later
                             } else {
-                                const result: CustomValidateResult<User> = await this.userRepo.checkUsernameEmailUnique(
+                                const result: CustomValidateResult<User> = await this.userService.checkUsernameEmailUnique(
                                     user,
                                     dbData,
                                 );
@@ -263,14 +265,14 @@ class AdminUserApiController {
             );
             await Promise.all(
                 updateArr.map(async user => {
-                    await this.userRepo.updateData(user, dbData, queryRunner, {
+                    await this.userService.updateData(user, dbData, queryRunner, {
                         wantValidate: false,
                     });
                 }),
             );
             await Promise.all(
                 insertArr.map(async user => {
-                    await this.userRepo.insertData(user, dbData, queryRunner, {
+                    await this.userService.insertData(user, dbData, queryRunner, {
                         wantValidate: false,
                         isPasswordHash: false,
                     });
@@ -309,7 +311,7 @@ class AdminUserApiController {
         let builder: SelectQueryBuilder<User>;
         let userList: User[];
         if (searchQuery) {
-            builder = await this.userRepo.getSearchQueryBuilder(
+            builder = await this.userService.getSearchQueryBuilder(
                 searchQuery,
                 false,
             ); // set false to turn off offset,limit search criteria
@@ -326,8 +328,8 @@ class AdminUserApiController {
                 user['role'] === 1
                     ? 'user'
                     : user['role'] === 2
-                    ? 'admin'
-                    : 'manager';
+                        ? 'admin'
+                        : 'manager';
         });
         const filename = `${dayjs(Date.now()).format(
             'DD-MM-YYYY-HH-mm-ss',
@@ -343,7 +345,7 @@ class AdminUserApiController {
                 quoted: true,
                 quoted_empty: true,
             },
-            function(err, data) {
+            function (err, data) {
                 if (err) {
                     res.status(500).json({
                         message: 'Internal Server Error\nFailed to export csv',

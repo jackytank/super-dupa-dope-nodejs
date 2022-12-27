@@ -1,11 +1,13 @@
 import { Request, Response } from 'express';
 import { getCustomRepository } from 'typeorm';
+import { AppDataSource } from '../DataSource';
 import { User } from '../entities/user.entity';
-import { UserRepository } from '../repositories/user.repository';
+import { UserService } from '../services/user.services';
 import { comparePassword } from '../utils/bcrypt';
 
 class IndexController {
-    private userRepo = getCustomRepository(UserRepository);
+    private userRepo = AppDataSource.getRepository(User);
+    private userService = new UserService();
 
     constructor() {
         this.indexPage = this.indexPage.bind(this);
@@ -32,7 +34,7 @@ class IndexController {
             req.flash('message', 'Please enter both username and password');
             res.redirect('/login');
         }
-        const findUser: User | undefined = await this.userRepo.findOne({
+        const findUser: User | null = await this.userRepo.findOneBy({
             username: username,
         });
         if (findUser) {

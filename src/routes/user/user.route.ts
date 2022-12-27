@@ -1,4 +1,7 @@
 import express from 'express';
+import AdminUserController from '../../controllers/admin/user/admin-user.controller';
+import { defaultAllow, allowParams, allowBody } from '../../middlewares/screenPermission';
+import { expressValidateUser, userExpressValidationRule } from '../../middlewares/validator/user/user.validator';
 const adminUserRouter = express.Router();
 
 // check permission for all routes

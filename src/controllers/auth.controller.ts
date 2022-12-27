@@ -4,9 +4,7 @@
  */
 import * as logger from '../utils/logger';
 import { Request, Response } from 'express';
-import { messages } from '../constants';
-import { getCustomRepository } from 'typeorm';
-import { UserRepository } from '../repositories/user.repository';
+import { UserService } from '../services/user.services';
 
 /**
  * GET login
@@ -28,10 +26,10 @@ export const auth = async (req: Request, res: Response) => {
     const { username, password } = req.body;
     try {
         // get a User repository to perform operations with User
-        const userRepository = getCustomRepository(UserRepository);
+        const userService = new UserService();
 
         // load a post by a given post id
-        const user = await userRepository.verifyCredentials(username, password);
+        const user = await userService.verifyCredentials(username, password);
 
         if (!user) {
             // write log
@@ -72,7 +70,7 @@ export const auth = async (req: Request, res: Response) => {
         res.render('login/index', {
             layout: 'layout/loginLayout',
             username: username,
-            message: 'Test',
+            message: 'Error when login!',
         });
     }
 };
@@ -82,7 +80,7 @@ export const auth = async (req: Request, res: Response) => {
  */
 export const logout = async (req: Request, res: Response) => {
     req.user.destroy();
-
+    const { redirect } = req.query;
     // write log
     logger.logInfo(req, 'User logged out successfully.');
 

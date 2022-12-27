@@ -4,6 +4,16 @@
 import { IMessage } from '../../constants';
 import { User } from '../../entities/user.entity';
 import * as models from '../../models';
+declare module 'express-session' {
+    interface SessionData {
+        user: User | undefined | null;
+        username: string | null;
+        loggedin: boolean | null;
+        authority: number | null;
+        userId: number | null;
+        searchQuery: Record<string, unknown> | null;
+    }
+}
 
 declare global {
     namespace Express {
@@ -19,27 +29,13 @@ declare global {
                     endpoint: string;
                     accessToken?: string;
                     refreshToken?: string;
-                    storeToken?(token: {
-                        accessToken: string;
-                        refreshToken: string;
-                    }): void;
+                    storeToken?(token: { accessToken: string; refreshToken: string }): void;
                 };
                 destroy(): void;
             };
             flash(message: string, value?: unknown): string[];
             consumeSession<X>(): { formData?: X; message?: IMessage };
         }
-    }
-}
-
-declare module 'express-session' {
-    interface SessionData {
-        user: User | null;
-        username: string | null;
-        loggedin: boolean | null;
-        authority: number | null;
-        userId: number | null;
-        searchQuery: Record<string, unknown> | null;
     }
 }
 
@@ -66,7 +62,4 @@ export type CustomValidateResult<Entity> = {
 
 export type DestinationCallback = (error: Error | null, destination: string) => void;
 
-export type FileNameCallback = (
-    error: Error | string | string[] | null,
-    filename: string,
-) => void;
+export type FileNameCallback = (error: Error | string | string[] | null, filename: string) => void;

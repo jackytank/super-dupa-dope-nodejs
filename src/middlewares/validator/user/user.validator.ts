@@ -2,7 +2,7 @@ import { body, validationResult } from 'express-validator';
 import { Request, Response, NextFunction } from 'express';
 import { errMsg } from '../../../constants';
 
-const userExpressValidationRule = (hasRetype: boolean) => {
+export const userExpressValidationRule = (hasRetype: boolean) => {
     // task validation: https://redmine.bridevelopment.com/issues/106778
     return [
         body('name')
@@ -48,19 +48,12 @@ const userExpressValidationRule = (hasRetype: boolean) => {
     ];
 };
 
-const expressValidateUser = (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-) => {
+export const expressValidateUser = (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     if (errors.isEmpty()) {
         return next();
     }
-    const extractedErrors: (
-        | { [s: string]: unknown }
-        | ArrayLike<unknown>
-    )[] = [];
+    const extractedErrors: ({ [s: string]: unknown } | ArrayLike<unknown>)[] = [];
     errors.array().forEach(err => {
         extractedErrors.push({ [err.param]: err.msg });
     });

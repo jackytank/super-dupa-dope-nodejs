@@ -1,6 +1,9 @@
 <!-- Main content -->
 <div class="contentInner">
   <!--簡単検索-->
+  <section class="text-center">
+    <h1>HOMEPAGE</h1>
+  </section>
   <section>
     <% if (typeof message !== 'undefined') { %>
       <%- include(`./common/message_${message.type}`, message) %>

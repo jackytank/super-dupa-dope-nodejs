@@ -1,32 +1,24 @@
 import {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    EntityRepository,
-    InsertResult,
-    QueryRunner,
-    Repository,
-    SelectQueryBuilder,
-    UpdateResult,
+    InsertResult, QueryRunner, SelectQueryBuilder, UpdateResult,
 } from 'typeorm';
 import _ from 'lodash';
 import * as fs from 'fs';
 import * as csv from 'csv-parse';
 import { User } from '../entities/user.entity';
 import { comparePassword, hashPassword } from '../utils/bcrypt';
-import {
-    CustomApiResult,
-    CustomDataTableResult,
-    CustomValidateResult,
-} from '../customTypings/express';
+import { CustomApiResult, CustomDataTableResult, CustomValidateResult } from '../customTypings/express';
 import { Company } from '../entities/company.entity';
 import { UserProfile } from '../entities/user-profile.entity';
 import { isValidDate } from '../utils/common';
+import { AppDataSource } from '../DataSource';
 
-@EntityRepository(User)
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export class UserRepository extends Repository<User>{
+export class UserService {
+    private userRepo = AppDataSource.getRepository(User);
+
     async verifyCredentials(username: string, password: string) {
-        const foundUser = await this.findOne({
-            where: { username },
+        const foundUser = await this.userRepo.findOne({
+            where: { username: username },
         });
 
         if (!foundUser) {
@@ -34,10 +26,7 @@ export class UserRepository extends Repository<User>{
         }
 
         // validate password
-        const passwordMatched = await comparePassword(
-            password,
-            foundUser!.password,
-        );
+        const passwordMatched = await comparePassword(password, foundUser!.password);
 
         if (!passwordMatched) {
             return null;
@@ -47,15 +36,12 @@ export class UserRepository extends Repository<User>{
         // foundUser.lastLogin = getCurrentSystemDatetime();
         foundUser.updatedBy = foundUser.name;
 
-        await this.update(foundUser.id, foundUser);
+        await this.userRepo.update(foundUser.id, foundUser);
 
         return foundUser;
     }
 
-    async readCsvData(
-        filePath: string,
-        parser: csv.Parser,
-    ): Promise<unknown[]> {
+    async readCsvData(filePath: string, parser: csv.Parser): Promise<unknown[]> {
         const result: unknown[] = [];
         return await new Promise((resolve, reject) =>
             fs
@@ -79,11 +65,8 @@ export class UserRepository extends Repository<User>{
                 }),
         );
     }
-    async getAllData(
-        take?: string,
-        limit?: string,
-    ): Promise<CustomApiResult<User>> {
-        const builder = this.createQueryBuilder('user').select('user');
+    async getAllData(take?: string, limit?: string): Promise<CustomApiResult<User>> {
+        const builder = this.userRepo.createQueryBuilder('user').select('user');
         let users: User[];
         try {
             // check if limit query is exist to prevent: typeorm RDBMS does not support OFFSET without LIMIT in SELECT statements
@@ -103,17 +86,15 @@ export class UserRepository extends Repository<User>{
             }
             users = await builder.getMany();
         } catch (error) {
-            users = await this.find();
+            users = await this.userRepo.find();
             console.log(error.message);
         }
         // users = await this.find();
         return { data: users, status: 200 };
     }
-    async getAllDataWithExtraPersonalInfo(
-        query: Record<string, unknown>,
-    ): Promise<CustomApiResult<User>> {
+    async getAllDataWithExtraPersonalInfo(query: Record<string, unknown>): Promise<CustomApiResult<User>> {
         const { companyId } = query;
-        const b = this.createQueryBuilder('u');
+        const b = this.userRepo.createQueryBuilder('u');
         let users: User[];
         try {
             if (companyId) {
@@ -140,7 +121,7 @@ export class UserRepository extends Repository<User>{
         }
     }
     async getOneData(id: number): Promise<CustomApiResult<User>> {
-        const findUser: User | undefined = await this.findOne({
+        const findUser: User | null = await this.userRepo.findOne({
             where: { id: id },
         });
         if (!findUser) {
@@ -152,13 +133,8 @@ export class UserRepository extends Repository<User>{
             status: 200,
         };
     }
-    async checkUsernameEmailUnique(
-        user: User,
-        dbData?: User[] | null,
-    ): Promise<CustomValidateResult<User>> {
-        const b: SelectQueryBuilder<User> = this.createQueryBuilder(
-            'user',
-        ).where('');
+    async checkUsernameEmailUnique(user: User, dbData?: User[] | null): Promise<CustomValidateResult<User>> {
+        const b: SelectQueryBuilder<User> = this.userRepo.createQueryBuilder('user').where('');
         let result = {
             message: '',
             isValid: false,
@@ -180,15 +156,9 @@ export class UserRepository extends Repository<User>{
                 findUsers = await b.getMany();
             } else {
                 if (user.id) {
-                    findUsers = dbData.filter(
-                        data =>
-                            data.username === user.username &&
-                            data.id !== user.id,
-                    );
+                    findUsers = dbData.filter(data => data.username === user.username && data.id !== user.id);
                 } else {
-                    findUsers = dbData.filter(
-                        data => data.username === user.username,
-                    );
+                    findUsers = dbData.filter(data => data.username === user.username);
                 }
             }
             if (findUsers.length > 0) {
@@ -217,14 +187,9 @@ export class UserRepository extends Repository<User>{
                 }
             } else {
                 if (user.id) {
-                    findUsers = dbData.filter(
-                        data =>
-                            data.email === user.email && data.id !== user.id,
-                    );
+                    findUsers = dbData.filter(data => data.email === user.email && data.id !== user.id);
                 } else {
-                    findUsers = dbData.filter(
-                        data => data.email === user.email,
-                    );
+                    findUsers = dbData.filter(data => data.email === user.email);
                 }
             }
             if (findUsers.length > 0) {
@@ -245,20 +210,9 @@ export class UserRepository extends Repository<User>{
             datas: findUsers,
         };
     }
-    async insertData(
-        user: User,
-        dbData: User[] | null,
-        queryRunner: QueryRunner,
-        options: {
-            wantValidate?: boolean;
-            isPasswordHash?: boolean;
-        },
-    ): Promise<CustomApiResult<User>> {
+    async insertData(user: User, dbData: User[] | null, queryRunner: QueryRunner, options: { wantValidate?: boolean; isPasswordHash?: boolean; },): Promise<CustomApiResult<User>> {
         if (options.wantValidate) {
-            const validateUser = await this.checkUsernameEmailUnique(
-                user,
-                dbData,
-            );
+            const validateUser = await this.checkUsernameEmailUnique(user, dbData);
             if (!validateUser.isValid) {
                 return { message: validateUser.message, status: 400 };
             }
@@ -292,19 +246,12 @@ export class UserRepository extends Repository<User>{
             return { message: 'Error when inserting user!', status: 500 };
         }
     }
-    async updateData(
-        user: User,
-        dbData: User[] | null,
-        queryRunner: QueryRunner,
-        options: { wantValidate?: boolean },
-    ): Promise<CustomApiResult<User>> {
+    async updateData(user: User, dbData: User[] | null, queryRunner: QueryRunner, options: { wantValidate?: boolean; }): Promise<CustomApiResult<User>> {
         let validateUser = null;
         if (options.wantValidate) {
             validateUser = await this.checkUsernameEmailUnique(user, dbData);
             if (!validateUser.isValid) {
-                const arr: number[] | undefined = validateUser.datas?.map(
-                    u => u.id,
-                );
+                const arr: number[] | undefined = validateUser.datas?.map(u => u.id);
                 if (!arr?.includes(user.id)) {
                     return { message: validateUser.message, status: 400 };
                 }
@@ -316,12 +263,9 @@ export class UserRepository extends Repository<User>{
             user.password = hashed;
         }
         // check if user exist by id
-        const findUser: User | undefined = await queryRunner.manager.findOne(
-            User,
-            {
-                id: user.id,
-            },
-        );
+        const findUser: User | null = await queryRunner.manager.findOneBy(User, {
+            id: user.id,
+        });
         if (!findUser) {
             return { message: `User ${user.id} not found`, status: 404 };
         }
@@ -330,11 +274,7 @@ export class UserRepository extends Repository<User>{
             if (dbData) {
                 updatedUser = await queryRunner.manager.save(User, user);
             } else {
-                updatedUser = await queryRunner.manager.update(
-                    User,
-                    { id: user.id },
-                    user,
-                );
+                updatedUser = await queryRunner.manager.update(User, { id: user.id }, user);
             }
             if (dbData) {
                 dbData.push(updatedUser as User);
@@ -349,19 +289,17 @@ export class UserRepository extends Repository<User>{
         }
     }
     async removeData(id: number): Promise<CustomApiResult<User>> {
-        const userToRemove: User | undefined = await this.findOne({ id });
+        const userToRemove: User | null = await this.userRepo.findOneBy({ id });
         if (!userToRemove) {
             return { message: `User ID ${id} Not Found`, status: 404 };
         }
-        await this.remove(userToRemove);
+        await this.userRepo.remove(userToRemove);
         return { message: `User removed successfully`, status: 200 };
     }
-    async searchData(
-        query: Record<string, unknown>,
-    ): Promise<CustomDataTableResult> {
+    async searchData(query: Record<string, unknown>): Promise<CustomDataTableResult> {
         const builder = await this.getSearchQueryBuilder(query, true);
         let data: string | User[];
-        const recordsTotal: number = await this.createQueryBuilder('user')
+        const recordsTotal: number = await this.userRepo.createQueryBuilder('user')
             .select('user')
             .getCount(); // get total records count
         const recordsFiltered: number = recordsTotal; // get filterd records count
@@ -370,7 +308,7 @@ export class UserRepository extends Repository<User>{
         } catch (error) {
             // if error then find all
             console.log(error);
-            data = await this.find();
+            data = await this.userRepo.find();
         }
         const returnData = {
             draw: query.draw as number,
@@ -380,21 +318,9 @@ export class UserRepository extends Repository<User>{
         };
         return returnData;
     }
-    async getSearchQueryBuilder(
-        query: Record<string, unknown>,
-        hasAnyLimitOrOffset: boolean,
-    ): Promise<SelectQueryBuilder<User>> {
-        const {
-            length,
-            start,
-            name,
-            username,
-            email,
-            role,
-            createdDateFrom,
-            createdDateTo,
-        } = query;
-        const builder = this.createQueryBuilder('user').where('');
+    async getSearchQueryBuilder(query: Record<string, unknown>, hasAnyLimitOrOffset: boolean): Promise<SelectQueryBuilder<User>> {
+        const { length, start, name, username, email, role, createdDateFrom, createdDateTo } = query;
+        const builder = this.userRepo.createQueryBuilder('user').where('');
         // let isFromAndToDateEqual = false;
         // check if queries exist then concat them with sql query
         if (hasAnyLimitOrOffset) {
@@ -406,18 +332,12 @@ export class UserRepository extends Repository<User>{
                 builder.offset(parseInt(start as string));
             }
         }
-        if (
-            !_.isNil(createdDateFrom) &&
-            isValidDate(new Date(createdDateFrom as string))
-        ) {
+        if (!_.isNil(createdDateFrom) && isValidDate(new Date(createdDateFrom as string))) {
             builder.andWhere('Date(user.created_at) >= :fromDate', {
                 fromDate: `${createdDateFrom}`,
             });
         }
-        if (
-            !_.isNil(createdDateTo) &&
-            isValidDate(new Date(createdDateTo as string))
-        ) {
+        if (!_.isNil(createdDateTo) && isValidDate(new Date(createdDateTo as string))) {
             builder.andWhere('Date(user.created_at) <= :toDate', {
                 toDate: `${createdDateTo}`,
             });
