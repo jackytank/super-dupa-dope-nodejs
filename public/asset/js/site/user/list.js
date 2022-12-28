@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-$(function() {
+$(function () {
     /**
      * Page load
      */
@@ -12,7 +12,7 @@ $(function() {
     const importCsvBtnEl = $('#importCsvBtn');
     const importCsvFileSizeEl = $('#fileSize');
 
-    $(document).ready(function() {
+    $(document).ready(function () {
         init();
         events();
     });
@@ -30,12 +30,12 @@ $(function() {
             serverSide: true,
             ajax: {
                 url: '/api/admin/users/search',
-                data: function(d) {
+                data: function (d) {
                     const name = $('form#searchForm input[type=text][name=name]').val();
                     const username = $('form#searchForm input[type=text][name=username]').val();
                     const email = $('form#searchForm input[type=text][name=email]').val();
                     const role = $('form#searchForm input[type=checkbox][name=role]:checked')
-                        .map(function(index, el) {
+                        .map(function (index, el) {
                             // get multiple checked checkbox as array
                             return $(el).val();
                         })
@@ -61,7 +61,7 @@ $(function() {
             columns: [
                 {
                     data: null,
-                    render: function(data, type, row, meta) {
+                    render: function (data, type, row, meta) {
                         const start = table.page.info().start + 1;
                         return start + meta.row;
                     },
@@ -72,28 +72,28 @@ $(function() {
                 {
                     data: 'name',
                     className: 'limit-char',
-                    render: function(data, type, row, meta) {
+                    render: function (data, type, row, meta) {
                         return data;
                     },
                 },
                 {
                     data: 'username',
                     className: 'limit-char',
-                    render: function(data, type, row, meta) {
+                    render: function (data, type, row, meta) {
                         return data;
                     },
                 },
                 {
                     data: 'password',
                     className: 'limit-char',
-                    render: function(data, type, row, meta) {
+                    render: function (data, type, row, meta) {
                         return data;
                     },
                 },
                 {
                     data: 'email',
                     className: 'limit-char',
-                    render: function(data, type, row, meta) {
+                    render: function (data, type, row, meta) {
                         return data;
                     },
                 },
@@ -103,13 +103,13 @@ $(function() {
                 {
                     data: 'role',
                     className: 'limit-char',
-                    render: function(data, type, row, meta) {
+                    render: function (data, type, row, meta) {
                         return data == 1 ? 'User' : data == 2 ? 'Admin' : 'Manager';
                     },
                 },
                 {
                     data: 'createdAt',
-                    render: function(data, type, row, meta) {
+                    render: function (data, type, row, meta) {
                         return data ? dayjs(data).format('DD/MM/YYYY HH:mm:ss') : '';
                     },
                 },
@@ -119,7 +119,7 @@ $(function() {
                 },
                 {
                     data: 'updatedAt',
-                    render: function(data, type, row, meta) {
+                    render: function (data, type, row, meta) {
                         return data ? dayjs(data).format('DD/MM/YYYY HH:mm:ss') : '';
                     },
                 },
@@ -129,7 +129,7 @@ $(function() {
                 },
                 {
                     data: null,
-                    render: function(data, type, row, meta) {
+                    render: function (data, type, row, meta) {
                         const userId = data.id;
                         // console.log('typeof userID', typeof getUserId);
                         console.log(getUserId);
@@ -150,7 +150,7 @@ $(function() {
     // events - START
     function events() {
         // if click del button then call ajax delete request
-        $(document).on('click', '#delUserBtn', function() {
+        $(document).on('click', '#delUserBtn', function () {
             const userId = $(this).attr('data-user-id');
             if (getUserRole !== 1) {
                 const check = confirm('Are you sure you want to delete this users?');
@@ -158,11 +158,11 @@ $(function() {
                     $.ajax({
                         type: 'DELETE',
                         url: `/api/admin/users/${userId}`,
-                        success: function(res) {
+                        success: function (res) {
                             alert(res.message);
                             location.reload();
                         },
-                        error: function(response, status, error) {
+                        error: function (response, status, error) {
                             console.log(response, status, error);
                         },
                     });
@@ -170,7 +170,7 @@ $(function() {
             }
         });
 
-        $(document).on('click', '#clearBtn', function() {
+        $(document).on('click', '#clearBtn', function () {
             // location.replace('/users/list');
             $(':input', '#searchForm')
                 .not(':button, :submit, :reset, :hidden')
@@ -181,7 +181,7 @@ $(function() {
         });
 
         // when search form is submit then send ajax GET then repopulate returned data to dataTable
-        $('#searchForm').on('submit', function(e) {
+        $('#searchForm').on('submit', function (e) {
             e.preventDefault();
             // const url1 = `/api/admin/users/search?name=${name}&username=${username}&email=${email}&role=${role}}`
             usersTableElement.DataTable().ajax.reload();
@@ -189,20 +189,20 @@ $(function() {
 
         $.validator.addMethod(
             'isValidCsvFile',
-            function(value, el) {
+            function (value, el) {
                 // const fileSize = element.size / 1024 / 1024 // in megabytes - mb
                 // iSize = (Math.round(iSize * 100) / 100)
-                const file = el.files[0]
-                const fileSize = file.size // in bytes
+                const file = el.files[0];
+                const fileSize = file.size; // in bytes
                 const fileExt = file.name.substring(file.name.lastIndexOf('.') + 1, file.name.length) || file.name; // ex: csv | txt | docx | doc
                 console.log('file ext', fileExt);
                 console.log('file size: ', fileSize);
                 // check if file size is bigger than 2mb
                 if (fileSize > 2097152) {
-                    return false
+                    return false;
                 }
                 if (fileExt !== 'csv') {
-                    return false
+                    return false;
                 }
                 return true;
             },
@@ -226,7 +226,7 @@ $(function() {
             const errorModalBodyEl = document.querySelector(`#${modalMsgId}`);
             const errorModalOkBtn = document.querySelector(`#${modalOkBtnId}`);
             let _msg = ``;
-            if (message != null && messages == null) {
+            if ((message != null || message !== '') && (messages == null || messages === '')) {
                 _msg = `
                         <h3>${status || ''}</h3>
                         <p>${message}</p>
@@ -249,7 +249,7 @@ $(function() {
             }
         };
 
-        $(document).on('click', '#importCsvBtn', function() {
+        $(document).on('click', '#importCsvBtn', function () {
             if (importCsvFormEl.valid()) {
                 const files = importCsvInputEl.prop('files');
                 const file = files[0];
@@ -263,12 +263,12 @@ $(function() {
                     contentType: false,
                     processData: false,
                     cache: false,
-                    success: function(data) {
+                    success: function (data) {
                         // location.reload();
                         openErrorModalWithMsg('errorModal', 'errorModalMessage', 'errorModalOkBtn', data.status, data.message, data.messages, true);
                         console.log('Return data: ', JSON.stringify(data, null, 4));
                     },
-                    error: function(req, stat, err) {
+                    error: function (req, stat, err) {
                         console.log(req);
                         openErrorModalWithMsg(
                             'errorModal',
@@ -285,12 +285,12 @@ $(function() {
             }
         });
 
-        $(document).on('click', '#exportCsvBtn', function() {
+        $(document).on('click', '#exportCsvBtn', function () {
             $.ajax({
                 method: 'POST',
                 url: '/api/admin/users/csv/export',
                 cache: false,
-                success: function(res) {
+                success: function (res) {
                     const blob = new Blob([res.data], {
                         type: 'text/csv;',
                     });
@@ -305,7 +305,7 @@ $(function() {
                     console.log(res.message);
                     openErrorModalWithMsg('errorModal', 'errorModalMessage', 'errorModalOkBtn', res.status || 200, res.message, null, false);
                 },
-                error: function(req, stat, err) {
+                error: function (req, stat, err) {
                     console.log(stat, err);
                     openErrorModalWithMsg('errorModal', 'errorModalMessage', 'errorModalOkBtn', req.responseJSON.status, req.responseJSON.message, null, false);
                 },

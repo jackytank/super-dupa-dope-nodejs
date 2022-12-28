@@ -20,7 +20,11 @@ router.use('/', authRouter);
 router.use(viewHelper);
 
 router.get('/', (req, res) => {
-    res.render('index');
+    const flashMessage = req.flash('message')[0];
+    res.render('index', { 
+        activeTab: 'dashboardTab',
+        message: flashMessage 
+    });
 });
 
 router.use('/admin/users', adminUserRouter);

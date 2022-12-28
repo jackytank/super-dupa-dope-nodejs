@@ -115,9 +115,7 @@ class AdminUserApiController {
         const msgObj: CustomApiResult<User> = { messages: [], status: 500 };
         try {
             if (req.file == undefined || req.file.mimetype !== 'text/csv') {
-                return res
-                    .status(400)
-                    .json({ message: 'Please upload a CSV file' });
+                return res.status(400).json({ message: 'Please upload a CSV file' });
             }
             // if (req.file.size > (_1mb * 2)) {
             //     return res.status(400).json({ message: 'File size cannot be larger than 2MB' });
@@ -128,38 +126,23 @@ class AdminUserApiController {
                 skip_empty_lines: true, // bỏ qua các dòng trống
                 columns: true, // gán header cho từng column trong row
             });
-            const records: unknown[] = await this.userService.readCsvData(
-                req.file.path,
-                parser,
-            );
-            const idRecords = records
-                .filter((record: CsvUserData) => record['id'] !== '')
-                .map((record: CsvUserData) => record['id']);
-            const usernameRecords = records
-                .filter((record: CsvUserData) => record['username'] !== '')
-                .map((record: CsvUserData) => record['username']);
-            const nameRecords = records
-                .filter((record: CsvUserData) => record['name'] !== '')
-                .map((record: CsvUserData) => record['name']);
+            const records: unknown[] = await this.userService.readCsvData(req.file.path, parser,);
+            const idRecords = records.filter((record: CsvUserData) => record['id'] !== '').map((record: CsvUserData) => record['id']);
+            const usernameRecords = records.filter((record: CsvUserData) => record['username'] !== '').map((record: CsvUserData) => record['username']);
+            const nameRecords = records.filter((record: CsvUserData) => record['name'] !== '').map((record: CsvUserData) => record['name']);
             const deleteArr: User[] = []; // array of users to delete
             const insertArr: User[] = []; // array of users to insert
             const updateArr: User[] = []; // array of users to update
             // query data from db first then pass it around to prevent multiple query to db
-            const builder = this.userRepo
-                .createQueryBuilder('user')
-                .select(['user.id', 'user.username', 'user.email']);
+            const builder = this.userRepo.createQueryBuilder('user').select(['user.id', 'user.username', 'user.email']);
             if (idRecords.length > 0) {
                 builder.orWhere('user.id IN (:ids)', { ids: idRecords });
             }
             if (usernameRecords.length > 0) {
-                builder.orWhere('user.username IN (:usernames)', {
-                    usernames: usernameRecords,
-                });
+                builder.orWhere('user.username IN (:usernames)', { usernames: usernameRecords, });
             }
             if (nameRecords.length > 0) {
-                builder.orWhere('user.name IN (:names)', {
-                    names: nameRecords,
-                });
+                builder.orWhere('user.name IN (:names)', { names: nameRecords, });
             }
             const dbData = await builder.getMany();
             // iterate csv records data and check row
@@ -169,32 +152,16 @@ class AdminUserApiController {
                 for (let i = 0; i < records.length; i++) {
                     const row: CsvUserData = records[i] as CsvUserData;
                     const user: User = Object.assign(new User(), {
-                        id:
-                            row['id'] === ''
-                                ? null
-                                : _.isString(row['id'])
-                                    ? parseInt(row['id'])
-                                    : row['id'],
+                        id: row['id'] === '' ? null : _.isString(row['id']) ? parseInt(row['id']) : row['id'],
                         name: row['name'] === '' ? null : row['name'],
-                        username:
-                            row['username'] === '' ? null : row['username'],
+                        username: row['username'] === '' ? null : row['username'],
                         email: row['email'] === '' ? null : row['email'],
-                        role: _.isString(row['role'])
-                            ? parseInt(row['role'])
-                            : row['role'],
+                        role: _.isString(row['role']) ? parseInt(row['role']) : row['role'],
                     });
                     // validate entity User using 'class-validator'
                     const errors: ValidationError[] = await validate(user);
                     if (errors.length > 0) {
-                        const errMsgStr = errors
-                            .map(error =>
-                                Object.values(
-                                    error.constraints as {
-                                        [type: string]: string;
-                                    },
-                                ),
-                            )
-                            .join(', ');
+                        const errMsgStr = errors.map(error => Object.values(error.constraints as { [type: string]: string; },),).join(', ');
                         msgObj.messages?.push(`Row ${i + 1} : ${errMsgStr}`);
                         continue;
                     }
@@ -205,14 +172,9 @@ class AdminUserApiController {
                             // deleted="y" và colum id không có nhập thì không làm gì hết, ngược lại sẽ xóa row theo id tương ứng dưới DB trong bảng user
                             continue;
                         }
-                        const result: CustomValidateResult<User> = await this.userService.checkUsernameEmailUnique(
-                            user,
-                            dbData,
-                        );
+                        const result: CustomValidateResult<User> = await this.userService.checkUsernameEmailUnique(user, dbData,);
                         if (result.isValid === false) {
-                            msgObj.messages?.push(
-                                `Row ${i + 1} : ${result.message}`,
-                            );
+                            msgObj.messages?.push(`Row ${i + 1} : ${result.message}`);
                             continue;
                         }
                         user.password = getRandomPassword();
@@ -227,30 +189,19 @@ class AdminUserApiController {
                                 dbData.splice(dbData.indexOf(findUser), 1); // remove from dbData to check unique later
                                 deleteArr.push(findUser); // push to map to delete later
                             } else {
-                                const result: CustomValidateResult<User> = await this.userService.checkUsernameEmailUnique(
-                                    user,
-                                    dbData,
-                                );
+                                const result: CustomValidateResult<User> = await this.userService.checkUsernameEmailUnique(user, dbData,);
                                 if (result.isValid === false) {
-                                    msgObj.messages?.push(
-                                        `Row ${i + 1} : ${result.message}`,
-                                    );
+                                    msgObj.messages?.push(`Row ${i + 1} : ${result.message}`,);
                                     continue;
                                 }
                                 user.updatedAt = new Date();
                                 user.updatedBy = req.session.user?.username as string;
-                                dbData.splice(
-                                    dbData.indexOf(result.data as User),
-                                    1,
-                                    result.data as User,
-                                ); // update dbData to check unique later
+                                dbData.splice(dbData.indexOf(result.data as User), 1, result.data as User,); // update dbData to check unique later
                                 updateArr.push(user); // push to map to update later
                             }
                         } else {
                             // Trường hợp id không có trong db => hiển thị lỗi "id not exist"
-                            msgObj.messages?.push(
-                                `Row ${i + 1} : Id not exist`,
-                            );
+                            msgObj.messages?.push(`Row ${i + 1} : Id not exist`);
                         }
                     }
                 }
@@ -260,24 +211,13 @@ class AdminUserApiController {
 
             // delete, update, insert - START
             await Promise.all(
-                deleteArr.map(async user => {
-                    await queryRunner.manager.remove<User>(user);
-                }),
+                deleteArr.map(async user => { await queryRunner.manager.remove<User>(user); }),
             );
             await Promise.all(
-                updateArr.map(async user => {
-                    await this.userService.updateData(user, dbData, queryRunner, {
-                        wantValidate: false,
-                    });
-                }),
+                updateArr.map(async user => { await this.userService.updateData(user, dbData, queryRunner, { wantValidate: false, }); }),
             );
             await Promise.all(
-                insertArr.map(async user => {
-                    await this.userService.insertData(user, dbData, queryRunner, {
-                        wantValidate: false,
-                        isPasswordHash: false,
-                    });
-                }),
+                insertArr.map(async user => { await this.userService.insertData(user, dbData, queryRunner, { wantValidate: false, isPasswordHash: false, }); }),
             );
             // delete, update, insert - END
 
@@ -286,9 +226,7 @@ class AdminUserApiController {
                 end();
                 msgObj.status = 400;
                 await queryRunner.rollbackTransaction();
-                return res
-                    .status(msgObj.status ?? 500)
-                    .json({ messages: msgObj.messages, status: msgObj.status });
+                return res.status(msgObj.status ?? 500).json({ messages: msgObj.messages, status: msgObj.status });
             } else {
                 end();
                 await queryRunner.commitTransaction();
@@ -299,9 +237,7 @@ class AdminUserApiController {
                 });
             }
         } catch (error) {
-            return res
-                .status(500)
-                .json({ messages: ['Internal Server Error'], status: 500 });
+            return res.status(500).json({ messages: ['Internal Server Error'], status: 500 });
         } finally {
             await queryRunner.release();
         }

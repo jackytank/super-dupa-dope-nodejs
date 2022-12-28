@@ -23,6 +23,7 @@ class AdminUserController {
         const flashMessage = req.flash('message')[0];
         const dataBack = req.flash('dataBack')[0];
         res.render('admin/users/add', {
+            activeTab: 'addUserTab',
             dataBack: dataBack ?? {},
             message: flashMessage
         });
@@ -36,6 +37,7 @@ class AdminUserController {
         const user: User = Object.assign(new User(), {
             name, username, password, email, role
         });
+        user.createdBy = req.session.user?.username as string;
         try {
             const result: CustomApiResult<User> = await this.userService.insertData(user, null, queryRunner, { wantValidate: true, isPasswordHash: true });
             if (result.status === 400 || result.status === 500) {
@@ -61,7 +63,12 @@ class AdminUserController {
         const result: CustomApiResult<User> = await this.userService.getOneData(parseInt(id));
         if (result.status === 200) {
             const flashMessage = req.flash('message')[0];
-            res.render('admin/users/edit', { dataBack: {}, message: flashMessage, user: result.data });
+            res.render('admin/users/edit', {
+                activeTab: 'listUserTab',
+                dataBack: {},
+                message: flashMessage,
+                user: result.data
+            });
         } else {
             req.flash("message", `Can't find user with id: ${id}`);
             res.redirect('/admin/users/list');
@@ -73,7 +80,7 @@ class AdminUserController {
         await queryRunner.startTransaction();
         const { id, name, username, email, role } = req.body;
         const user: User = Object.assign(new User(), { id, name, username, email, role });
-
+        user.updatedBy = req.session.user?.username as string;
         // if role from req is not user, check if user is admin or manager if neither throw 403
         if (role !== ROLE.USER + '') {
             if (req.session.authority !== ROLE.ADMIN && req.session.authority !== ROLE.MANAGER) {
@@ -100,12 +107,11 @@ class AdminUserController {
     }
     async listPage(req: Request, res: Response) {
         const flashMessage = req.flash('message')[0];
-        const userRole = req.session?.user?.role;
         res.render('admin/users/list', {
-            layout: 'layout/listLayout',
+            activeTab: 'listUserTab',
             queryBack: {},
             dayjs: dayjs,
-            message: flashMessage ?? '',
+            message: flashMessage,
         });
     }
     async changePassword(req: Request, res: Response) {

@@ -1,6 +1,8 @@
+import { IsNotIn } from 'class-validator';
 import { body, validationResult } from 'express-validator';
 import { Request, Response, NextFunction } from 'express';
 import { errMsg } from '../../../constants';
+import { UserRole } from '../../../entities/user.entity';
 
 export const userExpressValidationRule = (hasRetype: boolean) => {
     // task validation: https://redmine.bridevelopment.com/issues/106778
@@ -42,8 +44,9 @@ export const userExpressValidationRule = (hasRetype: boolean) => {
             .trim()
             .escape(),
         body('role')
-            .isEmpty()
-            .withMessage(errMsg.ERR001('role')),
+            // .not()
+            .isIn(Object.values(UserRole).concat(Object.values(UserRole).map((n) => n + "")))  // Ex: [1, 2, 3, '1', '2', '3']
+            .withMessage(errMsg.ERR003('role')),
     ];
 };
 
@@ -52,7 +55,7 @@ export const expressValidateUser = (req: Request, res: Response, next: NextFunct
     if (errors.isEmpty()) {
         return next();
     }
-    const extractedErrors: ({ [s: string]: unknown } | ArrayLike<unknown>)[] = [];
+    const extractedErrors: ({ [s: string]: unknown; } | ArrayLike<unknown>)[] = [];
     errors.array().forEach(err => {
         extractedErrors.push({ [err.param]: err.msg });
     });

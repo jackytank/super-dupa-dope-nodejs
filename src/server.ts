@@ -11,7 +11,6 @@ import * as moment from 'moment-timezone';
 import './DataSource';
 import flash from 'connect-flash';
 import cors from 'cors';
-import { User } from './entities/user.entity';
 
 moment.tz.setDefault('Asia/Tokyo');
 
@@ -33,7 +32,6 @@ app.use(
         parameterLimit: 10000,
     }),
 );
-
 app.use(
     session({
         secret: <string>process.env.SESSION_SECRET || 'session_secret',
@@ -44,9 +42,7 @@ app.use(
         },
     }),
 );
-
 app.use(cookieParser());
-
 app.use(express.static(`${__dirname}/../public`));
 app.use(router);
 app.use(errorHandler);

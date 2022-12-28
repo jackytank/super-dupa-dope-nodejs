@@ -27,38 +27,24 @@ export const auth = async (req: Request, res: Response) => {
     try {
         // get a User repository to perform operations with User
         const userService = new UserService();
-
         // load a post by a given post id
         const user = await userService.verifyCredentials(username, password);
-
         if (!user) {
             // write log
-            logger.logInfo(
-                req,
-                `Failed login attempt: name(${username || ''})`,
+            logger.logInfo(req, `Failed login attempt: name(${username || ''})`,
             );
-
             res.render('login/index', {
                 layout: 'layout/loginLayout',
                 username: username,
                 message: 'Username or password is incorrect',
             });
         }
-
         // save user info into session
-        (req.session as Express.Session).user = {
-            ...user,
-        };
-
+        (req.session as Express.Session).user = { ...user, };
         // write log
         logger.logInfo(req, `User id(${user!.id}) logged in successfully.`);
-
         // If [ログイン] clicked, then redirect to TOP page
-        if (
-            redirect !== undefined &&
-            redirect.length! > 0 &&
-            redirect !== '/'
-        ) {
+        if (redirect !== undefined && redirect.length! > 0 && redirect !== '/') {
             res.redirect(decodeURIComponent(redirect!.toString()));
         } else {
             res.redirect('/');
@@ -66,7 +52,6 @@ export const auth = async (req: Request, res: Response) => {
     } catch (err) {
         // write log
         logger.logInfo(req, `Failed login attempt: name(${username || ''})`);
-
         res.render('login/index', {
             layout: 'layout/loginLayout',
             username: username,
@@ -74,7 +59,6 @@ export const auth = async (req: Request, res: Response) => {
         });
     }
 };
-
 /**
  * GET logout
  */
@@ -83,7 +67,6 @@ export const logout = async (req: Request, res: Response) => {
     const { redirect } = req.query;
     // write log
     logger.logInfo(req, 'User logged out successfully.');
-
     let redirectURL = '/login';
     if (redirect !== undefined) {
         redirectURL += `?redirect=${encodeURIComponent(redirect!.toString())}`;

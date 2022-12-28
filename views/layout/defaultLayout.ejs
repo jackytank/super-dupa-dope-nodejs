@@ -33,25 +33,32 @@
 
 <body>
     <%- include('./defaultHeader') %>
-    <%- include('./defaultLeftMenu', {activeTab:'dashboardTab'}) %>
+    <% if(typeof activeTab !== 'undefined'){ %>
+    <%- include('./defaultLeftMenu', {activeTab:activeTab}) %>
+    <% } else {%>
+    <%- include('./defaultLeftMenu') %>
+    <% } %>
 
     <main class="mb-4">
+        <!-- view will be injected here -->
         <%- body %>
     </main>
 
-    <% (message) {%>
+
+    <%- include('./defaultScripts') %>
+
+    <!-- show message if exist -->
+    <% if(typeof message !== 'undefined') {%>
     <!-- modal id: #errorModal -->
-    <%- include('../common/modal/errorModal', {message:''}) %>
-    <!-- active errorModal if message exist -->
+    <%- include('../common/modal/errorModal', {message:message??''}) %>
     <script>
         const errorModal = document.querySelector('#errorModal');
         const modal = new mdb.Modal(errorModal);
         modal.show()
     </script>
     <% } %>
-
-    <%- include('./defaultScripts') %>
-
+    <!-- custom script will be injected here from html view file by express-ejs-layout -->
+    <%- script %>
 
 </body>
 
