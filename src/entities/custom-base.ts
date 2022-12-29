@@ -1,8 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
     Entity,
-    PrimaryGeneratedColumn,
     Column,
-    UpdateDateColumn,
     PrimaryColumn,
     Generated,
 } from 'typeorm';
@@ -14,17 +13,17 @@ export class CustomBase {
     id: number;
 
     @Column({ name: "created_at", nullable: true })
-    createdAt: Date;
+    created_at: Date;
 
     @Column({ type: "nvarchar", length: 255, nullable: true })
-    createdBy: string;
+    created_by: string;
 
     @Column({ name: "updated_at", nullable: true })
-    updatedAt: Date;
+    updated_at: Date;
 
     @Column({ type: "nvarchar", length: 255, nullable: true })
-    updatedBy: string;
+    updated_by: string;
 
     @Column({ name: "deleted_at", nullable: true })
-    deletedAt: Date;
+    deleted_at: Date;
 }

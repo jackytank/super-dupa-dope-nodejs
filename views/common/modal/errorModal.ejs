@@ -8,7 +8,9 @@
             </div>
             <div class="modal-body text-center">
                 <span id="errorModalMessage"></span>
+                <% if(typeof message !== 'undefined'){ %>
                 <%= message %>
+                <% } %>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal" id="errorModalOkBtn">OK</button>

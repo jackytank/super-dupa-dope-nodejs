@@ -3,18 +3,19 @@
  */
 import { Router } from 'express';
 import { notFound as notFoundHandler } from '../controllers/error.controller';
-import auth from '../middlewares/authentication';
 import sessionMiddleWare from '../middlewares/session';
 import userMiddleware from '../middlewares/user';
 import authRouter from './auth';
 import viewHelper from '../middlewares/viewHelper';
 import adminUserRouter from './user/user.route';
 import adminUserApiRouter from './user/user.api.route';
+import { noCache } from '../middlewares/noCache';
 
 const router = Router();
 
 router.use(sessionMiddleWare);
 router.use(userMiddleware);
+router.use(noCache) // disable cache to prevent back button issue after logout
 router.use('/', authRouter);
 // router.use(auth);
 router.use(viewHelper);

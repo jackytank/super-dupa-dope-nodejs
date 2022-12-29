@@ -6,17 +6,17 @@ export class Base {
     id: number;
 
     @Column({ name: 'created_at', nullable: true })
-    createdAt: Date;
+    created_at: Date;
 
     @Column({ name: 'created_by', type: 'nvarchar', length: 255, nullable: true })
-    createdBy: string;
+    created_by: string;
 
     @Column({ name: 'updated_at', nullable: true })
-    updatedAt: Date;
+    updated_at: Date;
 
     @Column({ name: 'updated_by', type: 'nvarchar', length: 255, nullable: true })
-    updatedBy: string;
+    updated_by: string;
 
     @Column({ name: 'deleted_at', nullable: true })
-    deletedAt: Date;
+    deleted_at: Date;
 }

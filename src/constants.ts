@@ -77,6 +77,12 @@ export const _1MB = 1024 * 1024;
 
 export const _1GB = _1MB * 1024;
 
+export const _1TB = _1GB * 1024;
+
+export const _MB = (multiply: number) => {
+    return _1MB * multiply;
+};
+
 export const ROLE = {
     USER: 1,
     ADMIN: 2,

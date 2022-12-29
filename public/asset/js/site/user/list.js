@@ -15,6 +15,8 @@ $(function () {
 
     // init - START
     function init() {
+        searchFormIdStr = '#searchForm';
+        searchForm = $(searchFormIdStr);
         usersTableElement = $('#usersTable');
         searchBtn = $('#searchBtn');
         getUserRole = parseInt(document.querySelector('#user-role')?.dataset?.userRole); // get user role attribute in defaultHeader.ejs (data-user-role="")
@@ -24,6 +26,11 @@ $(function () {
         importCsvInputEl = $('#importCsvInput');
         importCsvBtnEl = $('#importCsvBtn');
         importCsvFileSizeEl = $('#fileSize');
+
+        createdDateFromStr = '#createdDateFrom';
+        createdDateToStr = '#createdDateTo';
+        createdDateFrom = $(createdDateFromStr);
+        createdDateTo = $(createdDateToStr);
 
         const table = usersTableElement.DataTable({
             ordering: false,
@@ -57,7 +64,7 @@ $(function () {
                     d.companyName = companyName;
                 },
                 error: function (xhr, error, code) {
-                    alert('error datatable boi!');
+                    alert('Datatable ajax request error!');
                 }
             },
             columnDefs: [
@@ -148,8 +155,6 @@ $(function () {
                     data: null,
                     render: function (data, type, row, meta) {
                         const userId = data.id;
-                        // console.log('typeof userID', typeof getUserId);
-                        console.log(getUserId);
                         const isEditDisabled = getUserRole === 1 ? (Number(getUserId) === data.id ? '' : 'disabled') : '';
                         // if authority is 1 (User) then disable edit button except for himself (id matches)
                         const isDelDisabled = getUserRole === 1 ? 'disabled' : '';
@@ -166,6 +171,7 @@ $(function () {
     }
     // validation - START
     function validation() {
+        // add validate methods - START
         $.validator.addMethod(
             'isValidCsvFile',
             function (value, el) {
@@ -188,6 +194,16 @@ $(function () {
             '',
         );
 
+        $.validator.addMethod('dateGreaterThanEqual',
+            function (value, element, params) {
+                if (!/Invalid|NaN/.test(new Date(value))) {
+                    return new Date(value) >= new Date($(params).val());
+                }
+                return isNaN(value) && isNaN($(params).val())
+                    || (Number(value) >= Number($(params).val()));
+            });
+        // add validate methods - END
+
         importCsvFormEl.validate({
             rules: {
                 file: {
@@ -198,6 +214,20 @@ $(function () {
             messages: {
                 file: '',
             },
+        });
+
+        searchForm.validate({
+            errorElement: "span",
+            rules: {
+                createdDateTo: {
+                    dateGreaterThanEqual: '#createdDateFrom',
+                }
+            },
+            messages: {
+                createdDateTo: {
+                    dateGreaterThanEqual: 'Date to must be greater than or equal to date from',
+                }
+            }
         });
     }
     // validation - END
@@ -227,41 +257,46 @@ $(function () {
 
         $(document).on('click', '#clearBtn', function () {
             // location.replace('/users/list');
-            $(':input', '#searchForm')
+            $(':input', searchFormIdStr)
                 .not(':button, :submit, :reset, :hidden')
                 .prop('checked', false)
                 .prop('selected', false)
-                .not(':checkbox, :radio, select')
+                .not(':checkbox, :radio, select') // not clear checkbox and radio, select
                 .val('');
             searchBtn.attr("disabled", false);
         });
 
         // when search form is submit then send ajax GET then repopulate returned data to dataTable
-        $('#searchForm').on('submit', function (e) {
+        $(searchFormIdStr).on('submit', function (e) {
             e.preventDefault();
-            // const url1 = `/api/admin/users/search?name=${name}&username=${username}&email=${email}&role=${role}}`
             searchBtn.attr("disabled", true);
-            usersTableElement.DataTable().ajax.reload();
-
+            if ($('#searchForm').valid()) {
+                usersTableElement.DataTable().ajax.reload();
+            };
             // wait for 1.2s then enable search button
-            setTimeout(function () {
+            setTimeout(() => {
                 searchBtn.attr("disabled", false);
-            }, 1200);
+            }, 350);
+
         });
+
+        // $(document).on('click', , function () {
+
+        // });
 
         const openErrorModalWithMsg = (modalId, modalMsgId, modalOkBtnId, status, message, messages, wantReload) => {
             const errorModalEl = document.querySelector(`#${modalId}`);
             const errorModalBodyEl = document.querySelector(`#${modalMsgId}`);
             const errorModalOkBtn = document.querySelector(`#${modalOkBtnId}`);
             let _msg = ``;
-            if (message != null && message !== '') {
-                _msg = `
+            if (message) {
+                _msg += `
                         <h3>${status || ''}</h3>
                         <p>${message}</p>
                      `;
             }
-            if (messages != null && messages.length >= 0) {
-                _msg = `
+            if (messages) {
+                _msg += `
                         <h3>${status || ''}</h3>
                         <ul class="text-center">
                             ${messages.map(msg => `<li class="row">${msg}</li>`)}
@@ -310,6 +345,7 @@ $(function () {
                         );
                     },
                 });
+                document.querySelector('#importCsvForm').reset();
             } else {
                 alert('Please select a valid .csv file and no bigger than 2mb!');
             }

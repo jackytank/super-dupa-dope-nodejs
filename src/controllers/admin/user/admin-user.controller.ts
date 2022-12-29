@@ -37,7 +37,7 @@ class AdminUserController {
         const user: User = Object.assign(new User(), {
             name, username, password, email, role
         });
-        user.createdBy = req.session.user?.username as string;
+        user.created_by = req.session.user?.username as string;
         try {
             const result: CustomApiResult<User> = await this.userService.insertData(user, null, queryRunner, { wantValidate: true, isPasswordHash: true });
             if (result.status === 400 || result.status === 500) {
@@ -80,7 +80,7 @@ class AdminUserController {
         await queryRunner.startTransaction();
         const { id, name, username, email, role } = req.body;
         const user: User = Object.assign(new User(), { id, name, username, email, role });
-        user.updatedBy = req.session.user?.username as string;
+        user.updated_by = req.session.user?.username as string;
         // if role from req is not user, check if user is admin or manager if neither throw 403
         if (role !== ROLE.USER + '') {
             if (req.session.user?.role !== ROLE.ADMIN && req.session.user?.role !== ROLE.MANAGER) {

@@ -4,16 +4,25 @@ $(function () {
      * Page load
      */
     $(document).ready(function () {
+        init();
         formValidation();
+        events();
     });
 
     /**
      * Form validation
      */
+    function init() {
+        username = $('#username');
+        password = $('#password');
+        submitBtn = $('#submitBtn');
+        errorMessage = $('#errorMessage');
+    }
+
     function formValidation() {
         // Form Validation
         $('#loginFrm').validate({
-            lang: 'ja',
+            lang: 'vn',
             errorElement: 'span',
             errorClass: 'has-error',
             highlight: function (element, errorClass) {
@@ -34,6 +43,15 @@ $(function () {
                     required: { name: 'Username is required!' },
                 },
             },
+        });
+    }
+
+    function events() {
+        username.on('keyup', function () {
+            $('#errorMessage').html('');
+        });
+        password.on('keyup', function () {
+            $('#errorMessage').html('');
         });
     }
 });

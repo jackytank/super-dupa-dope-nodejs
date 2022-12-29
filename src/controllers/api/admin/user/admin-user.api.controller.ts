@@ -2,21 +2,17 @@ import { CustomDataTableResult } from './../../../../customTypings/express/index
 import { Request, Response } from 'express';
 import _ from 'lodash';
 import * as csv from 'csv-parse';
-import {
-    SelectQueryBuilder,
-} from 'typeorm';
+import { SelectQueryBuilder, } from 'typeorm';
 import { validate, ValidationError } from 'class-validator';
 import { stringify } from 'csv-stringify';
 import dayjs from 'dayjs';
 import { UserService } from '../../../../services/user.services';
-import {
-    CustomApiResult,
-    CustomValidateResult,
-} from '../../../../customTypings/express';
+import { CustomApiResult, CustomValidateResult, } from '../../../../customTypings/express';
 import { User } from '../../../../entities/user.entity';
-import { bench, getRandomPassword } from '../../../../utils/common';
+import { bench, getRandomPassword, isValidDate } from '../../../../utils/common';
 import { UserModel } from '../../../../models/user.model';
 import { AppDataSource } from '../../../../DataSource';
+import { _1MB } from '../../../../constants';
 
 interface CsvUserData {
     id: unknown;
@@ -54,9 +50,9 @@ class AdminUserApiController {
         return res.status(result.status as number).json(result);
     }
     async search(req: Request, res: Response) {
-        // save req.query to session for export csv based on search query
-        req.session.searchQuery = req.query;
         try {
+            // save req.query to session for export csv based on search query
+            req.session.searchQuery = req.query;
             const data: CustomDataTableResult = await this.userService.searchData(req.query);
             return res.status(200).json(data);
         } catch (error) {
@@ -118,19 +114,22 @@ class AdminUserApiController {
             if (req.file == undefined || req.file.mimetype !== 'text/csv') {
                 return res.status(400).json({ message: 'Please upload a CSV file' });
             }
-            // if (req.file.size > (_1mb * 2)) {
-            //     return res.status(400).json({ message: 'File size cannot be larger than 2MB' });
-            // }
+            if (req.file.size > (_1MB * 2)) {
+                return res.status(400).json({ message: 'File size cannot be larger than 2MB' });
+            }
             const parser = csv.parse({
                 delimiter: ',', // phân cách giữa các cell trong mỗi row
                 trim: true, // bỏ các khoảng trắng ở đầu và cuối của mỗi cell
                 skip_empty_lines: true, // bỏ qua các dòng trống
                 columns: true, // gán header cho từng column trong row
             });
-            const records: unknown[] = await this.userService.readCsvData(req.file.path, parser,);
+            const records: unknown[] = await this.userService.readCsvData(req.file.path, parser);
+            if (records.length === 0) {
+                return res.status(400).json({ message: 'File is empty' });
+            }
             const idRecords = records.filter((record: CsvUserData) => record['id'] !== '').map((record: CsvUserData) => record['id']);
             const usernameRecords = records.filter((record: CsvUserData) => record['username'] !== '').map((record: CsvUserData) => record['username']);
-            const nameRecords = records.filter((record: CsvUserData) => record['name'] !== '').map((record: CsvUserData) => record['name']);
+            const emailRecords = records.filter((record: CsvUserData) => record['email'] !== '').map((record: CsvUserData) => record['email']);
             const deleteArr: User[] = []; // array of users to delete
             const insertArr: User[] = []; // array of users to insert
             const updateArr: User[] = []; // array of users to update
@@ -142,10 +141,10 @@ class AdminUserApiController {
             if (usernameRecords.length > 0) {
                 builder.orWhere('user.username IN (:usernames)', { usernames: usernameRecords, });
             }
-            if (nameRecords.length > 0) {
-                builder.orWhere('user.name IN (:names)', { names: nameRecords, });
+            if (emailRecords.length > 0) {
+                builder.orWhere('user.email IN (:emails)', { emails: emailRecords, });
             }
-            const dbData = await builder.getMany();
+            const memDbData = await builder.getMany();
             // iterate csv records data and check row
             const { start, end } = bench();
             start();
@@ -173,31 +172,31 @@ class AdminUserApiController {
                             // deleted="y" và colum id không có nhập thì không làm gì hết, ngược lại sẽ xóa row theo id tương ứng dưới DB trong bảng user
                             continue;
                         }
-                        const result: CustomValidateResult<User> = await this.userService.checkUsernameEmailUnique(user, dbData,);
+                        const result: CustomValidateResult<User> = await this.userService.checkUsernameEmailUnique(user, memDbData,);
                         if (result.isValid === false) {
                             msgObj.messages?.push(`Row ${i + 1} : ${result.message}`);
                             continue;
                         }
                         user.password = getRandomPassword();
-                        user.createdBy = req.session.user?.username as string;
-                        dbData.push(user); // push to dbData to check unique later
+                        user.created_by = req.session.user?.username as string;
+                        memDbData.push(user); // push to dbData to check unique later
                         insertArr.push(user); // push to map to insert later
                     } else {
                         // Trường hợp id có trong db (chứ ko phải trong transaction) => chỉnh sửa user nếu deleted != 'y'
-                        const findUser = _.find(dbData, { id: user.id });
+                        const findUser = _.find(memDbData, { id: user.id });
                         if (findUser) {
                             if (row['deleted'] === 'y') {
-                                dbData.splice(dbData.indexOf(findUser), 1); // remove from dbData to check unique later
+                                memDbData.splice(memDbData.indexOf(findUser), 1); // remove from dbData to check unique later
                                 deleteArr.push(findUser); // push to map to delete later
                             } else {
-                                const result: CustomValidateResult<User> = await this.userService.checkUsernameEmailUnique(user, dbData,);
+                                const result: CustomValidateResult<User> = await this.userService.checkUsernameEmailUnique(user, memDbData,);
                                 if (result.isValid === false) {
                                     msgObj.messages?.push(`Row ${i + 1} : ${result.message}`,);
                                     continue;
                                 }
-                                user.updatedAt = new Date();
-                                user.updatedBy = req.session.user?.username as string;
-                                dbData.splice(dbData.indexOf(result.data as User), 1, result.data as User,); // update dbData to check unique later
+                                user.updated_at = new Date();
+                                user.updated_by = req.session.user?.username as string;
+                                memDbData.splice(memDbData.indexOf(result.data as User), 1, result.data as User,); // update dbData to check unique later
                                 updateArr.push(user); // push to map to update later
                             }
                         } else {
@@ -215,10 +214,10 @@ class AdminUserApiController {
                 deleteArr.map(async user => { await queryRunner.manager.remove<User>(user); }),
             );
             await Promise.all(
-                updateArr.map(async user => { await this.userService.updateData(user, dbData, queryRunner, { wantValidate: false, }); }),
+                updateArr.map(async user => { await this.userService.updateData(user, memDbData, queryRunner, { wantValidate: false, }); }),
             );
             await Promise.all(
-                insertArr.map(async user => { await this.userService.insertData(user, dbData, queryRunner, { wantValidate: false, isPasswordHash: false, }); }),
+                insertArr.map(async user => { await this.userService.insertData(user, memDbData, queryRunner, { wantValidate: false, isPasswordHash: false, }); }),
             );
             // delete, update, insert - END
 
@@ -249,57 +248,43 @@ class AdminUserApiController {
         let builder: SelectQueryBuilder<User>;
         let userList: User[];
         if (searchQuery) {
-            builder = await this.userService.getSearchQueryBuilder(
-                searchQuery,
-                false,
-            ); // set false to turn off offset,limit search criteria
-            userList = await builder.getMany();
+            builder = await this.userService.getSearchQueryBuilder(searchQuery, false); // set false to turn off offset,limit search criteria
+            userList = await builder.getRawMany();
         } else {
             userList = await this.userRepo.find();
         }
         start(); // begin count time start
         // format date, transform role number to string (Ex: '1' => 'User')
         userList.map((user: UserModel) => {
-            user['createdAt'] = dayjs(user['createdAt']).format('YYYY/MM/DD');
-            user['updatedAt'] = dayjs(user['updatedAt']).format('YYYY/MM/DD');
-            user['role'] =
-                user['role'] === 1
-                    ? 'user'
-                    : user['role'] === 2
-                        ? 'admin'
-                        : 'manager';
+            user['created_at'] = isValidDate(user['created_at']) ? dayjs(user['created_at']).format('YYYY/MM/DD') : '';
+            user['updated_at'] = isValidDate(user['updated_at']) ? dayjs(user['updated_at']).format('YYYY/MM/DD') : '';
+            user['role'] = user['role'] === 1 ? 'user' : user['role'] === 2 ? 'admin' : 'manager';
         });
-        const filename = `${dayjs(Date.now()).format(
-            'DD-MM-YYYY-HH-mm-ss',
-        )}-users.csv`;
+        const filename = `${dayjs(Date.now()).format('DD-MM-YYYY-HH-mm-ss',)}-users.csv`;
         const columns = Object.keys(userList[0]);
         const columns_string = columns.toString().replace(/,/g, ',');
-        stringify(
-            userList,
-            {
-                // header: true,
-                columns: columns,
-                delimiter: ',',
-                quoted: true,
-                quoted_empty: true,
-            },
-            function (err, data) {
-                if (err) {
-                    res.status(500).json({
-                        message: 'Internal Server Error\nFailed to export csv',
-                        status: 500,
-                    });
-                }
-                data = columns_string + '\n' + data;
-                end(); // end count time and log to console
-                res.status(200).json({
-                    data: data,
-                    status: 200,
-                    message: `Export to CSV success!, \nTotal records: ${userList.length}`,
-                    filename: filename,
+        stringify(userList, {
+            // header: true,
+            columns: columns,
+            delimiter: ',',
+            quoted: true,
+            quoted_empty: true,
+        }, function (err, data) {
+            if (err) {
+                res.status(500).json({
+                    message: 'Internal Server Error\nFailed to export csv',
+                    status: 500,
                 });
-            },
-        );
+            }
+            data = columns_string + '\n' + data;
+            end(); // end count time and log to console
+            res.status(200).json({
+                data: data,
+                status: 200,
+                message: `Export to CSV success!, \nTotal records: ${userList.length}`,
+                filename: filename,
+            });
+        });
     }
     //for routing control purposes - END
 }

@@ -1,13 +1,13 @@
 export class BaseModel {
     id: number;
 
-    createdAt: Date | string;
+    created_at: Date | string;
 
-    createdBy: string;
+    created_by: string;
 
-    updatedAt: Date | string;
+    updated_at: Date | string;
 
-    updatedBy: string;
+    updated_by: string;
 
-    deletedAt: Date | string;
+    deleted_at: Date | string;
 }

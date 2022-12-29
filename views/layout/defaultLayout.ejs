@@ -54,7 +54,9 @@
         const modal = new mdb.Modal(errorModal);
         modal.show()
     </script>
-    <% } %>
+    <% } else{%>
+        <%- include('../common/modal/errorModal') %>
+    <% } %> 
     <!-- custom script will be injected here from html view file by express-ejs-layout -->
     <%- script %>
 

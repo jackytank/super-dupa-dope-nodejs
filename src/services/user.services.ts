@@ -28,7 +28,7 @@ export class UserService {
         }
         // update last_login
         // foundUser.lastLogin = getCurrentSystemDatetime();
-        foundUser.updatedBy = foundUser.name;
+        foundUser.updated_by = foundUser.name;
         await this.userRepo.update(foundUser.id, foundUser);
         return foundUser;
     }
@@ -110,7 +110,6 @@ export class UserService {
                 }
             }
             users = await b.getRawMany();
-            const qry = b.getQueryAndParameters();
             const count = users.length;
             return { data: users, status: 200, count: count };
         } catch {
@@ -118,17 +117,21 @@ export class UserService {
         }
     }
     async getOneData(id: number): Promise<CustomApiResult<User>> {
-        const findUser: User | null = await this.userRepo.findOne({
-            where: { id: id },
-        });
-        if (!findUser) {
-            return { message: `User ID ${id} Not Found!`, status: 404 };
+        try {
+            const findUser: User | null = await this.userRepo.findOne({
+                where: { id: id },
+            });
+            if (!findUser) {
+                return { message: `User ID ${id} Not Found!`, status: 404 };
+            }
+            return {
+                message: `Found user with id ${id}`,
+                data: findUser,
+                status: 200,
+            };
+        } catch (error) {
+            return { message: `Error when get one user`, status: 500 };
         }
-        return {
-            message: `Found user with id ${id}`,
-            data: findUser,
-            status: 200,
-        };
     }
     async checkUsernameEmailUnique(user: User, dbData?: User[] | null): Promise<CustomValidateResult<User>> {
         const b: SelectQueryBuilder<User> = this.userRepo.createQueryBuilder('user').where('');
@@ -141,14 +144,9 @@ export class UserService {
         if (user.username) {
             if (!dbData) {
                 if (user.id) {
-                    b.orWhere('user.username = :username AND user.id <> :id', {
-                        username: `${user.username}`,
-                        id: user.id,
-                    });
+                    b.orWhere('user.username = :username AND user.id <> :id', { username: `${user.username}`, id: user.id });
                 } else {
-                    b.orWhere('user.username = :username', {
-                        username: `${user.username}`,
-                    });
+                    b.orWhere('user.username = :username', { username: `${user.username}` });
                 }
                 findUsers = await b.getMany();
             } else {
@@ -159,28 +157,20 @@ export class UserService {
                 }
             }
             if (findUsers.length > 0) {
-                result = Object.assign(
-                    {},
-                    {
-                        message: 'Username is already exist!',
-                        isValid: false,
-                        datas: findUsers as User[] | null,
-                    },
-                );
+                result = Object.assign({}, {
+                    message: 'Username is already exist!',
+                    isValid: false,
+                    datas: findUsers as User[] | null,
+                });
                 return result;
             }
         }
         if (user.email) {
             if (!dbData) {
                 if (user.id) {
-                    b.orWhere('user.email = :email AND user.id <> :id', {
-                        email: `${user.email}`,
-                        id: user.id,
-                    });
+                    b.orWhere('user.email = :email AND user.id <> :id', { email: `${user.email}`, id: user.id });
                 } else {
-                    b.orWhere('user.email = :email', {
-                        email: `${user.email}`,
-                    });
+                    b.orWhere('user.email = :email', { email: `${user.email}` });
                 }
             } else {
                 if (user.id) {
@@ -190,14 +180,11 @@ export class UserService {
                 }
             }
             if (findUsers.length > 0) {
-                result = Object.assign(
-                    {},
-                    {
-                        message: 'Email is already exist!',
-                        isValid: false,
-                        datas: findUsers,
-                    },
-                );
+                result = Object.assign({}, {
+                    message: 'Email is already exist!',
+                    isValid: false,
+                    datas: findUsers,
+                },);
                 return result;
             }
         }
@@ -214,7 +201,7 @@ export class UserService {
                 return { message: validateUser.message, status: 400 };
             }
         }
-        user.createdAt = new Date();
+        user.created_at = new Date();
         // hash pass if isPasswordHash is true, incase of insert data from csv file (already had pass)
         if (options.isPasswordHash) {
             const hashed = await hashPassword(user.password);
@@ -254,7 +241,7 @@ export class UserService {
                 }
             }
         }
-        user.updatedAt = new Date();
+        user.updated_at = new Date();
         if (!_.isNil(user.password)) {
             const hashed = await hashPassword(user.password);
             user.password = hashed;
@@ -286,19 +273,21 @@ export class UserService {
         }
     }
     async removeData(id: number): Promise<CustomApiResult<User>> {
-        const userToRemove: User | null = await this.userRepo.findOneBy({ id });
-        if (!userToRemove) {
-            return { message: `User ID ${id} Not Found`, status: 404 };
+        try {
+            const userToRemove: User | null = await this.userRepo.findOneBy({ id });
+            if (!userToRemove) {
+                return { message: `User ID ${id} Not Found`, status: 404 };
+            }
+            await this.userRepo.remove(userToRemove);
+            return { message: `User removed successfully`, status: 200 };
+        } catch (error) {
+            return { message: `Error when removing user`, status: 500 };
         }
-        await this.userRepo.remove(userToRemove);
-        return { message: `User removed successfully`, status: 200 };
     }
     async searchData(query: Record<string, unknown>): Promise<CustomDataTableResult> {
         const builder = await this.getSearchQueryBuilder(query, true);
         let data: string | User[];
-        const recordsTotal: number = await this.userRepo.createQueryBuilder('user')
-            .select('user')
-            .getCount(); // get total records count
+        const recordsTotal: number = await this.userRepo.count(); // get total records count
         let recordsFiltered: number; // get filterd records count
         try {
             data = await builder.getRawMany(); //get data
@@ -307,7 +296,7 @@ export class UserService {
             // if error then find all
             console.log(error);
             data = await this.userRepo.find();
-            recordsFiltered = await this.userRepo.count();
+            recordsFiltered = recordsTotal;
         }
         const returnData = {
             draw: query.draw as number,
@@ -320,8 +309,8 @@ export class UserService {
     async getSearchQueryBuilder(query: Record<string, unknown>, hasAnyLimitOrOffset: boolean): Promise<SelectQueryBuilder<User>> {
         const { length, start, name, username, email, role, createdDateFrom, createdDateTo, companyId, companyName } = setAllNull(query, { isEmpty: true });
         const b = this.userRepo.createQueryBuilder('user').
-        select(['user.*','company.name as `company_name`'])
-        .leftJoin('companies', 'company', 'company.id = user.company_id');
+            select(['user.*', 'company.name as `company_name`'])
+            .leftJoin('companies', 'company', 'company.id = user.company_id');
 
         // let isFromAndToDateEqual = false;
         // check if queries exist then concat them with sql query

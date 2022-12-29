@@ -25,23 +25,19 @@ app.use(flash());
 app.use(cors());
 app.use(favicon(`${__dirname}/../public/favicon.ico`));
 app.use(bodyParser.json({ limit: '50mb' }));
-app.use(
-    bodyParser.urlencoded({
-        extended: true,
-        limit: '50mb',
-        parameterLimit: 10000,
-    }),
-);
-app.use(
-    session({
-        secret: <string>process.env.SESSION_SECRET || 'session_secret',
-        resave: true,
-        saveUninitialized: true,
-        cookie: {
-            maxAge: 3600000,
-        },
-    }),
-);
+app.use(bodyParser.urlencoded({
+    extended: true,
+    limit: '50mb',
+    parameterLimit: 10000,
+}));
+app.use(session({
+    secret: <string>process.env.SESSION_SECRET || 'session_secret',
+    resave: true,
+    saveUninitialized: true,
+    cookie: {
+        maxAge: 3600000,
+    }
+}));
 app.use(cookieParser());
 app.use(express.static(`${__dirname}/../public`));
 app.use(router);

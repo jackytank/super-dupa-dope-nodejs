@@ -6,4 +6,5 @@ export class UserModel extends BaseModel {
     name: string;
     password: string;
     email: string;
+    // company_id: number | string;
 }

@@ -20,12 +20,17 @@ $(function () {
     }
 
     function formValidation() {
+        const strongPassRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,20}$/;
+        $.validator.addMethod('checkStrongPassword', function (value, element) {
+            return strongPassRegex.test(value);
+        }, 'Password must between 6-20 characters, at least one numeric and a special character "@#$%^" !');
+
         // Form Validation
         $(formIdStr).validate({
             rules: {
                 "password": {
                     required: true,
-                    minlength: 6
+                    checkStrongPassword: true,
                 },
                 "retype": {
                     required: true,
