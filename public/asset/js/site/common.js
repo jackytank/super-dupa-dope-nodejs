@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 const MIN_TRUNCATE_LENGTH = 20;
 const PAGE_LINE = 10;
 const MAX_PAGE_BUTTON = 5;
@@ -561,3 +562,34 @@ jQuery.fn.extend({
     }
   }
 });
+
+// Example starter JavaScript for disabling form submissions if there are invalid fields
+(() => {
+  'use strict';
+
+  // Fetch all the forms we want to apply custom Bootstrap validation styles to
+  const forms = document.querySelectorAll('.needs-validation');
+
+  // Loop over them and prevent submission
+  Array.prototype.slice.call(forms).forEach((form) => {
+    form.addEventListener('submit', (event) => {
+      if (!form.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      form.classList.add('was-validated');
+    }, false);
+  });
+})();
+
+function checkPasswordMatch(confirmPass, submitBtnId) {
+  const password = document.getElementById("password");
+  const submit = document.getElementById(submitBtnId);
+  if (confirmPass.value != password.value) {
+    confirmPass.setCustomValidity("Passwords do not match.");
+    submit.disabled = true;
+  } else {
+    confirmPass.setCustomValidity('');
+    submit.disabled = false;
+  }
+}

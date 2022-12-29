@@ -1,0 +1,10 @@
+{
+  "projectName": "tri-briswell-intern-1",
+  "meta": {
+    "type": "backend"
+  },
+  "backend": {
+    "platform": "briswell1"
+  },
+  "hash": "e5d10874"
+}

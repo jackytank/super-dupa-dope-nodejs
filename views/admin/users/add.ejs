@@ -8,38 +8,46 @@
     </section>
 
     <div class="container">
-        <form id="addUserForm" method="POST">
+        <form id="addUserForm" class="needs-validation" method="POST" novalidate>
             <div class="row mb-4">
                 <div class="col-md-6 col-sm-12">
                     <label for="">Name:</label>
-                    <input type="text" id="form6Example1" class="form-control" name="name" placeholder="Name" <%=dataBack.name?`value=${dataBack.name}` : `` %> />
+                    <input type="text" id="form6Example1" class="form-control" name="name" maxlength="100" placeholder="Name" required <%=dataBack.name?`value=${dataBack.name}` : `` %> />
+                    <div class="invalid-feedback">Name is required.</div>
                 </div>
                 <div class="col-md-6 col-sm-12">
                     <label for="">Username:</label>
-                    <input type="text" id="form6Example2" class="form-control" name="username" placeholder="Username" <%=dataBack.username? `value=${dataBack.username}` : `` %> />
+                    <input type="text" id="form6Example2" class="form-control" name="username" maxlength="255" placeholder="Username" required <%=dataBack.username? `value=${dataBack.username}` : `` %> />
+                    <div class="invalid-feedback">Username is required.</div>
                 </div>
             </div>
             <div class="row mb-4">
                 <div class="col-md-6 col-sm-12">
                     <label for="">Password:</label>
-                    <input type="password" id="password" class="form-control" name="password" placeholder="Password" />
+                    <input type="password" id="password" class="form-control" name="password" data-mdb-showcounter="true" minlength="8" maxlength="20" pattern="^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,20}$" required placeholder="Password" />
+                    <div class="invalid-feedback">Must between 8-20 letters, at least 1 numeric and a special character "@#$%^"</div>
+                    <div class="form-helper"></div>
                 </div>
                 <div class="col-md-6 col-sm-12">
                     <label for="">Retype:</label>
-                    <input type="password" id="retype" class="form-control" name="retype" placeholder="Retype" />
+                    <input type="password" id="retype" class="form-control" name="retype" data-mdb-showcounter="true" minlength="8" maxlength="20" oninput="checkPasswordMatch(this);" required placeholder="Retype" />
+                    <div class="invalid-feedback">Retype must match password.</div>
+                    <div class="form-helper"></div>
                 </div>
             </div>
             <div class="mb-4">
                 <label for="">Email:</label>
-                <input type="email" id="email" class="form-control" name="email" placeholder="Email" <%=dataBack.email?`value=${dataBack.email}` : ``%> />
+                <input type="email" id="email" class="form-control" name="email" maxlength="255" placeholder="Email" pattern="^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$" required <%=dataBack.email?`value=${dataBack.email}` : ``%> />
+                <div class="invalid-feedback">Email must be a valid email.</div>
             </div>
             <div class="mb-4">
                 <label for="selectRole">Role: </label>
-                <select name="role" class="" id="selectRole">
+                <select name="role" class="" id="selectRole" required>
                     <option value="1" <%=dataBack.role===1? 'selected' :'' %>>1 - User</option>
                     <option value="2" <%=dataBack.role===2? 'selected' :'' %>>2 - Admin</option>
                     <option value="3" <%=dataBack.role===3? 'selected' :'' %>>3 - Manager</option>
                 </select>
+                <div class="invalid-feedback">Please choose a role.</div>
             </div>
             <!-- Submit button -->
             <button type="submit" class="btn btn-primary btn-block mb-4" id="createUserBtn">CREATE</button>

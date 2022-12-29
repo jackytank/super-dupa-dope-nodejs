@@ -253,12 +253,18 @@ class AdminUserApiController {
         } else {
             userList = await this.userRepo.find();
         }
-        start(); // begin count time start
+        // if list is empty then return 404
+        // userList = [];
+        if (userList.length === 0) {
+            return res.status(404).json({ message: 'Database is empty!', status: 404 });
+        }
+        start();
         // format date, transform role number to string (Ex: '1' => 'User')
         userList.map((user: UserModel) => {
             user['created_at'] = isValidDate(user['created_at']) ? dayjs(user['created_at']).format('YYYY/MM/DD') : '';
             user['updated_at'] = isValidDate(user['updated_at']) ? dayjs(user['updated_at']).format('YYYY/MM/DD') : '';
             user['role'] = user['role'] === 1 ? 'user' : user['role'] === 2 ? 'admin' : 'manager';
+            user['password'] = user['password'].replace(/./g, '*'); // Ex: '123456' to '******'
         });
         const filename = `${dayjs(Date.now()).format('DD-MM-YYYY-HH-mm-ss',)}-users.csv`;
         const columns = Object.keys(userList[0]);
@@ -276,14 +282,26 @@ class AdminUserApiController {
                     status: 500,
                 });
             }
-            data = columns_string + '\n' + data;
-            end(); // end count time and log to console
-            res.status(200).json({
-                data: data,
-                status: 200,
-                message: `Export to CSV success!, \nTotal records: ${userList.length}`,
-                filename: filename,
-            });
+            // data = '';
+            // if list empty then export only header
+            if (data.length === 0) {
+                data = columns_string + '\n';
+                res.status(200).json({
+                    data: data,
+                    status: 200,
+                    message: 'Database is empty!',
+                    filename: filename,
+                });
+            } else {
+                data = columns_string + '\n' + data;
+                end(); // end count time and log to console
+                res.status(200).json({
+                    data: data,
+                    status: 200,
+                    message: `Export to CSV success!, \nTotal records: ${userList.length}`,
+                    filename: filename,
+                });
+            }
         });
     }
     //for routing control purposes - END

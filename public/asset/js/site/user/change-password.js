@@ -26,19 +26,19 @@ $(function () {
         }, 'Password must between 6-20 characters, at least one numeric and a special character "@#$%^" !');
 
         // Form Validation
-        $(formIdStr).validate({
-            rules: {
-                "password": {
-                    required: true,
-                    checkStrongPassword: true,
-                },
-                "retype": {
-                    required: true,
-                    equalTo: "#password",
-                    minlength: 6
-                }
-            }
-        });
+        // $(formIdStr).validate({
+        //     rules: {
+        //         "password": {
+        //             required: true,
+        //             checkStrongPassword: true,
+        //         },
+        //         "retype": {
+        //             required: true,
+        //             equalTo: "#password",
+        //             minlength: 6
+        //         }
+        //     }
+        // });
     }
 
     function events() {

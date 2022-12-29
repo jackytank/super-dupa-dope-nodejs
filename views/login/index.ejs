@@ -26,32 +26,36 @@
                     <div class="card" style="border-radius: 1rem;">
                         <div class="row g-0">
                             <div class="col-md-6 col-lg-5 d-none d-md-block">
-                                <div class="bg-image hover-zoom">
-                                    <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/img1.webp" alt="login form" class="img-fluid" style="border-radius: 1rem 0 0 1rem;" />
-                                </div>
+                                <a class="ripple" href="#!">
+                                    <div class="bg-image hover-zoom">
+                                        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/img1.webp" alt="login form" class="img-fluid" style="border-radius: 1rem 0 0 1rem;" />
+                                    </div>
+                                </a>
                             </div>
                             <div class="col-md-6 col-lg-7 d-flex align-items-center">
                                 <div class="card-body p-4 p-lg-5 text-black">
                                     <!-- start form -->
-                                    <form method="post" class="mb-2">
+                                    <form method="post" class="mb-2 needs-validation" id="loginForm" novalidate>
                                         <div class="d-flex align-items-center mb-3 pb-1">
-                                            <img src="/asset/images/bris.png" height="35" alt="" loading="lazy" />
+                                            <img src="/asset/images/bris.png" height="50" alt="" loading="lazy" />
                                             <span class="h1 fw-bold mb-0">Briswell Vietnam</span>
                                         </div>
                                         <h5 class="fw-normal mb-3 pb-3" style="letter-spacing: 1px;">Sign into your account</h5>
                                         <div class="form-outline mb-4">
-                                            <input type="text" id="username" class="form-control form-control-lg" name="username" value=<%= username%>>
+                                            <input type="text" id="username" class="form-control form-control-lg" name="username" value="<%= username%>" required>
                                             <label class="form-label" for="username">Username</label>
+                                            <div class="invalid-feedback">Username is required.</div>
                                         </div>
                                         <div class="form-outline mb-4">
-                                            <input type="password" id="password" class="form-control form-control-lg" name="password">
+                                            <input type="password" id="password" class="form-control form-control-lg" name="password" required>
                                             <label class="form-label" for="password">Password</label>
+                                            <div class="invalid-feedback">Password is required.</div>
                                         </div>
                                         <div class="pt-1 mb-4">
                                             <button class="btn btn-outline-dark btn-lg btn-block" type="submit" name="submitBtn" id="submitBtn">Login</button>
                                         </div>
                                         <a class="small text-muted" href="#!">Forgot password?</a>
-                                        <p class="mb-5 pb-lg-2" style="color: #393f81;">Don't have an account? <a href="#!" style="color: #393f81;">Register
+                                        <p class="mb-5 pb-lg-2" style="color: #398159;">Don't have an account? <a href="#!" style="color: #393f81;">Register
                                                 here</a></p>
                                         <a href="#!" class="small text-muted">Terms of use.</a>
                                         <a href="#!" class="small text-muted">Privacy policy</a>

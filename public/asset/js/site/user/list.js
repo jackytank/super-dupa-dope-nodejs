@@ -155,15 +155,15 @@ $(function () {
                     data: null,
                     render: function (data, type, row, meta) {
                         const userId = data.id;
-                        const isEditDisabled = getUserRole === 1 ? (Number(getUserId) === data.id ? '' : 'disabled') : '';
+                        const isEditDisabled = getUserRole === 1 ? (Number(getUserId) === data.id ? false : true) : false;
                         // if authority is 1 (User) then disable edit button except for himself (id matches)
-                        const isDelDisabled = getUserRole === 1 ? 'disabled' : '';
+                        const isDelDisabled = getUserRole === 1 ? true : false;
                         return `
-                  <div class="btn-group" role="group" aria-label="Basic example">
-                      <a href="/admin/users/edit/${userId}" class="btn btn-secondary ${isEditDisabled}">Edit</a>
-                      <button class="btn btn-danger"${isDelDisabled} id="delUserBtn" data-user-id="${userId}">Del</button>
-                  </div>
-                  `;
+                        <div class="btn-group" role="group" aria-label="Basic example">
+                            ${isEditDisabled ? '' : `<a href="/admin/users/edit/${userId}" class="btn btn-secondary">Edit</a>`}
+                            ${isDelDisabled ? '' : `<button class="btn btn-danger"${isDelDisabled} id="delUserBtn" data-user-id="${userId}">Del</button>`}
+                        </div>
+                        `;
                     },
                 },
             ],

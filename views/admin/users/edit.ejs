@@ -8,29 +8,33 @@
     </section>
 
     <div class="container">
-        <form id="editUserForm" method="POST">
+        <form id="editUserForm" class="needs-validation" method="POST" novalidate>
             <div class="row mb-4">
-                <input type="text" id="" class="form-control" name="id" placeholder="ID" value="<%= user.id ? user.id: '' %>" hidden />
+                <input type="text" id="" class="form-control" name="id" placeholder="ID" required value="<%= user.id ? user.id: '' %>" hidden />
                 <div class="col-md-6 col-sm-12">
                     <label for="">Name:</label>
-                    <input type="text" id="" class="form-control" name="name" placeholder="Name" value="<%= user.name ? user.name: '' %>" />
+                    <input type="text" id="" class="form-control" name="name" maxlength="20" placeholder="Name" required value="<%= user.name ? user.name: '' %>" />
+                    <div class="invalid-feedback">Name is required.</div>
                 </div>
                 <div class="col-md-6 col-sm-12">
                     <label for="">Username:</label>
-                    <input type="text" id="" class="form-control" name="username" placeholder="Username" value="<%= user.username ? user.username: '' %>" />
+                    <input type="text" id="" class="form-control" name="username" maxlength="20" placeholder="Username" required value="<%= user.username ? user.username: '' %>" />
+                    <div class="invalid-feedback">Username is required.</div>
                 </div>
             </div>
             <div class="mb-4">
                 <label for="">Email:</label>
-                <input type="email" id="email" class="form-control" name="email" placeholder="Email" value="<%= user.email ? user.email: '' %>" />
+                <input type="email" id="email" class="form-control" name="email" pattern="^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$" placeholder="Email" required value="<%= user.email ? user.email: '' %>" />
+                <div class="invalid-feedback">Email must be a valid email.</div>
             </div>
             <div class="mb-4">
                 <label for="selectRole">Role: </label>
-                <select name="role" class="" id="selectRole">
+                <select name="role" class="" id="selectRole" required>
                     <option value="1" <%=user.role===1? 'selected' :'' %>>1 - User</option>
                     <option value="2" <%=user.role===2? 'selected' :'' %>>2 - Admin</option>
                     <option value="3" <%=user.role===3? 'selected' :'' %>>3 - Manager</option>
                 </select>
+                <div class="invalid-feedback">Please choose a role.</div>
             </div>
             <div class="mb-4">
                 <a href="/admin/users/change-password/<%= user.id %> ">Change password?</a>

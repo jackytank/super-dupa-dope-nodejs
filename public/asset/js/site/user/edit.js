@@ -20,8 +20,7 @@ $(function () {
 
     function formValidation() {
         // Form Validation
-        $.validator.addMethod(
-            'checkValidEmail',
+        $.validator.addMethod('checkValidEmail',
             function (value, element) { return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(value); },
             'Please enter a valid email address please !',
         );

@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn } from 'typeorm';
 
 @Entity()
 export class Base {
@@ -6,12 +6,14 @@ export class Base {
     id: number;
 
     @Column({ name: 'created_at', nullable: true })
+    @CreateDateColumn()
     created_at: Date;
 
     @Column({ name: 'created_by', type: 'nvarchar', length: 255, nullable: true })
     created_by: string;
 
     @Column({ name: 'updated_at', nullable: true })
+    @UpdateDateColumn()
     updated_at: Date;
 
     @Column({ name: 'updated_by', type: 'nvarchar', length: 255, nullable: true })
