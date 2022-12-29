@@ -1,9 +1,9 @@
-$(function() {
+/* eslint-disable @typescript-eslint/no-use-before-define */
+$(function () {
     /**
      * Page load
      */
-    $(document).ready(function() {
-        // eslint-disable-next-line @typescript-eslint/no-use-before-define
+    $(document).ready(function () {
         formValidation();
     });
 
@@ -16,22 +16,22 @@ $(function() {
             lang: 'ja',
             errorElement: 'span',
             errorClass: 'has-error',
-            highlight: function(element, errorClass) {
+            highlight: function (element, errorClass) {
                 // $(element).parents('.inputBox').addClass(errorClass);
             },
-            unhighlight: function(element, errorClass) {
+            unhighlight: function (element, errorClass) {
                 // $(element).parents('.inputBox').removeClass(errorClass);
             },
-            errorPlacement: function(err, el) {
+            errorPlacement: function (err, el) {
                 err.addClass('help-block').appendTo(el.parent());
                 $('#errorMessage').html('');
             },
             rules: {
                 password: {
-                    required: { name: 'パスワード' },
+                    required: { name: 'Password is required!' },
                 },
                 name: {
-                    required: { name: 'ユーザー名' },
+                    required: { name: 'Username is required!' },
                 },
             },
         });

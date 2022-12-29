@@ -38,7 +38,7 @@ function allow(options: {
     return (req: Request, res: Response, next: NextFunction) => {
         const userRole = req.session.user?.role;
         if (options.permitIf && options.permitIf.userSessionPropEqualPropFrom) {
-            if (req.params && options.permitIf.userSessionPropEqualPropFrom.params) {
+            if (Object.keys(req.params).length !== 0 && options.permitIf.userSessionPropEqualPropFrom.params) {
                 const { whichProp } = options.permitIf.userSessionPropEqualPropFrom.params;
                 const userSession = req.session === undefined ? undefined : req.session.user;
                 const prop = userSession?.[whichProp as keyof typeof userSession];
@@ -47,7 +47,7 @@ function allow(options: {
                     return;
                 }
             }
-            if (req.body && options.permitIf.userSessionPropEqualPropFrom.body) {
+            if (Object.keys(req.body).length !== 0 && options.permitIf.userSessionPropEqualPropFrom.body) {
                 const { whichProp } = options.permitIf.userSessionPropEqualPropFrom.body;
                 const userSession = req.session === undefined ? undefined : req.session.user;
                 const prop = userSession?.[whichProp as keyof typeof userSession];

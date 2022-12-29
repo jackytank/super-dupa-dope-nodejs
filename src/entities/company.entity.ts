@@ -1,7 +1,8 @@
 import { Base } from './base';
-import { Entity, Column } from "typeorm";
+import { Entity, Column, ManyToOne } from "typeorm";
 import { IsNotEmpty, MaxLength } from "class-validator";
 import { errMsg } from '../constants';
+import { User } from './user.entity';
 
 
 /**
@@ -23,4 +24,8 @@ export class Company extends Base {
         message: errMsg.ERR006('name', 255)
     })
     name!: string;
+
+    @ManyToOne(() => User, u => u.companies)
+    // @JoinColumn({ name: 'state_id' })
+    user: User;
 }

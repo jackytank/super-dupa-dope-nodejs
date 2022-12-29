@@ -55,13 +55,16 @@
                             <input class="form-check-input" type="checkbox" id="inlineCheckbox3" name="role" value="3" <%= queryBack.role? (queryBack.role.includes('3')? 'checked':''):'' %> />
                             <label class="form-check-label" for="inlineCheckbox3">3 - Manager</label>
                         </div>
-
-                        <!-- <select name="role">
-                                <option disabled value="null">Search role...</option>
-                                <option value="1" <%=queryBack.role===1? 'selected' :'' %>>1 - User</option>
-                                <option value="2" <%=queryBack.role===2? 'selected' :'' %>>2 - Admin</option>
-                                <option value="3" <%=queryBack.role===3? 'selected' :'' %>>3 - Manager</option>
-                            </select> -->
+                    </div>
+                </div>
+                <div class="row justify-content-between">
+                    <div class="col-md-6 col-sm-12 mb-2">
+                        <input class="form-control" type="number" name="companyId" id="companyId" placeholder="Search by company id..." <%=queryBack.companyId? `value=${queryBack.companyId}
+                        ` : `` %>>
+                    </div>
+                    <div class="col-md-6 col-sm-12 mb-2">
+                        <input class="form-control" type="text" name="companyName" id="companyName" placeholder="Search by company name..." <%=queryBack.companyName? `value=${queryBack.companyName}
+                        ` : `` %>>
                     </div>
                 </div>
                 <div class="row justify-content-between">
@@ -96,6 +99,7 @@
                             <th>Email</th>
                             <th>Role</th>
                             <th>Role Name</th>
+                            <th>Company Name</th>
                             <th>CreatedAt</th>
                             <th>CreatedBy</th>
                             <th>UpdatedAt</th>

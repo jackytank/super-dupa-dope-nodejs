@@ -3,25 +3,28 @@ $(function () {
     /**
      * Page load
      */
-    const usersTableElement = $('#usersTable');
-    const getUserRole = parseInt(document.querySelector('#userAuthority')?.dataset?.authority);
-    const getUserId = $('#user-id')?.dataset?.userid;
-    // for import, export csv
-    const importCsvFormEl = $('#importCsvForm');
-    const importCsvInputEl = $('#importCsvInput');
-    const importCsvBtnEl = $('#importCsvBtn');
-    const importCsvFileSizeEl = $('#fileSize');
-
     $(document).ready(function () {
         init();
+        validation();
         events();
     });
 
     /**
-     * Init datatable
+     * Init datatable, validation, events
      */
+
     // init - START
     function init() {
+        usersTableElement = $('#usersTable');
+        searchBtn = $('#searchBtn');
+        getUserRole = parseInt(document.querySelector('#user-role')?.dataset?.userRole); // get user role attribute in defaultHeader.ejs (data-user-role="")
+        getUserId = parseInt(document.querySelector('#user-id')?.dataset?.userId); // get user id attribute in defaultHeader.ejs (data-user-id="")
+        // for import, export csv
+        importCsvFormEl = $('#importCsvForm');
+        importCsvInputEl = $('#importCsvInput');
+        importCsvBtnEl = $('#importCsvBtn');
+        importCsvFileSizeEl = $('#fileSize');
+
         const table = usersTableElement.DataTable({
             ordering: false,
             searching: false,
@@ -34,6 +37,8 @@ $(function () {
                     const name = $('form#searchForm input[type=text][name=name]').val();
                     const username = $('form#searchForm input[type=text][name=username]').val();
                     const email = $('form#searchForm input[type=text][name=email]').val();
+                    const companyId = $('form#searchForm input[type=number][name=companyId]').val();
+                    const companyName = $('form#searchForm input[type=text][name=companyName]').val();
                     const role = $('form#searchForm input[type=checkbox][name=role]:checked')
                         .map(function (index, el) {
                             // get multiple checked checkbox as array
@@ -48,7 +53,12 @@ $(function () {
                     d.role = role;
                     d.createdDateFrom = createdDateFrom;
                     d.createdDateTo = createdDateTo;
+                    d.companyId = companyId;
+                    d.companyName = companyName;
                 },
+                error: function (xhr, error, code) {
+                    alert('error datatable boi!');
+                }
             },
             columnDefs: [
                 {
@@ -108,23 +118,30 @@ $(function () {
                     },
                 },
                 {
-                    data: 'createdAt',
+                    data: 'company_name',
+                    className: 'limit-char',
+                    render: function (data, type, row, meta) {
+                        return data;
+                    }
+                },
+                {
+                    data: 'created_at',
                     render: function (data, type, row, meta) {
                         return data ? dayjs(data).format('DD/MM/YYYY HH:mm:ss') : '';
                     },
                 },
                 {
-                    data: 'createdBy',
+                    data: 'created_by',
                     className: 'limit-char',
                 },
                 {
-                    data: 'updatedAt',
+                    data: 'updated_at',
                     render: function (data, type, row, meta) {
                         return data ? dayjs(data).format('DD/MM/YYYY HH:mm:ss') : '';
                     },
                 },
                 {
-                    data: 'updatedBy',
+                    data: 'updated_by',
                     className: 'limit-char',
                 },
                 {
@@ -139,7 +156,7 @@ $(function () {
                         return `
                   <div class="btn-group" role="group" aria-label="Basic example">
                       <a href="/admin/users/edit/${userId}" class="btn btn-secondary ${isEditDisabled}">Edit</a>
-                      <button class="btn btn-danger ${isDelDisabled}"${isDelDisabled} id="delUserBtn" data-user-id="${userId}">Del</button>
+                      <button class="btn btn-danger"${isDelDisabled} id="delUserBtn" data-user-id="${userId}">Del</button>
                   </div>
                   `;
                     },
@@ -147,46 +164,8 @@ $(function () {
             ],
         });
     }
-    // events - START
-    function events() {
-        // if click del button then call ajax delete request
-        $(document).on('click', '#delUserBtn', function () {
-            const userId = $(this).attr('data-user-id');
-            if (getUserRole !== 1) {
-                const check = confirm('Are you sure you want to delete this users?');
-                if (check) {
-                    $.ajax({
-                        type: 'DELETE',
-                        url: `/api/admin/users/${userId}`,
-                        success: function (res) {
-                            alert(res.message);
-                            location.reload();
-                        },
-                        error: function (response, status, error) {
-                            console.log(response, status, error);
-                        },
-                    });
-                }
-            }
-        });
-
-        $(document).on('click', '#clearBtn', function () {
-            // location.replace('/users/list');
-            $(':input', '#searchForm')
-                .not(':button, :submit, :reset, :hidden')
-                .val('')
-                .prop('checked', false)
-                .prop('selected', false);
-            // usersTableElement.DataTable().ajax.reload()
-        });
-
-        // when search form is submit then send ajax GET then repopulate returned data to dataTable
-        $('#searchForm').on('submit', function (e) {
-            e.preventDefault();
-            // const url1 = `/api/admin/users/search?name=${name}&username=${username}&email=${email}&role=${role}}`
-            usersTableElement.DataTable().ajax.reload();
-        });
-
+    // validation - START
+    function validation() {
         $.validator.addMethod(
             'isValidCsvFile',
             function (value, el) {
@@ -220,18 +199,68 @@ $(function () {
                 file: '',
             },
         });
+    }
+    // validation - END
+
+    // events - START
+    function events() {
+        // if click del button then call ajax delete request
+        $(document).on('click', '#delUserBtn', function () {
+            const userId = $(this).attr('data-user-id');
+            if (getUserRole !== 1) {
+                const check = confirm('Are you sure you want to delete this users?');
+                if (check) {
+                    $.ajax({
+                        type: 'DELETE',
+                        url: `/api/admin/users/${userId}`,
+                        success: function (res) {
+                            alert(res.message);
+                            location.reload();
+                        },
+                        error: function (response, status, error) {
+                            console.log(response, status, error);
+                        },
+                    });
+                }
+            }
+        });
+
+        $(document).on('click', '#clearBtn', function () {
+            // location.replace('/users/list');
+            $(':input', '#searchForm')
+                .not(':button, :submit, :reset, :hidden')
+                .prop('checked', false)
+                .prop('selected', false)
+                .not(':checkbox, :radio, select')
+                .val('');
+            searchBtn.attr("disabled", false);
+        });
+
+        // when search form is submit then send ajax GET then repopulate returned data to dataTable
+        $('#searchForm').on('submit', function (e) {
+            e.preventDefault();
+            // const url1 = `/api/admin/users/search?name=${name}&username=${username}&email=${email}&role=${role}}`
+            searchBtn.attr("disabled", true);
+            usersTableElement.DataTable().ajax.reload();
+
+            // wait for 1.2s then enable search button
+            setTimeout(function () {
+                searchBtn.attr("disabled", false);
+            }, 1200);
+        });
 
         const openErrorModalWithMsg = (modalId, modalMsgId, modalOkBtnId, status, message, messages, wantReload) => {
             const errorModalEl = document.querySelector(`#${modalId}`);
             const errorModalBodyEl = document.querySelector(`#${modalMsgId}`);
             const errorModalOkBtn = document.querySelector(`#${modalOkBtnId}`);
             let _msg = ``;
-            if ((message != null || message !== '') && (messages == null || messages === '')) {
+            if (message != null && message !== '') {
                 _msg = `
                         <h3>${status || ''}</h3>
                         <p>${message}</p>
                      `;
-            } else {
+            }
+            if (messages != null && messages.length >= 0) {
                 _msg = `
                         <h3>${status || ''}</h3>
                         <ul class="text-center">
@@ -277,6 +306,7 @@ $(function () {
                             req.statusText || req.responseJSON.status,
                             req.responseJSON.message,
                             req.responseJSON.messages,
+                            false
                         );
                     },
                 });

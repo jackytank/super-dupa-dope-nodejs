@@ -83,9 +83,9 @@ class AdminUserController {
         user.updatedBy = req.session.user?.username as string;
         // if role from req is not user, check if user is admin or manager if neither throw 403
         if (role !== ROLE.USER + '') {
-            if (req.session.authority !== ROLE.ADMIN && req.session.authority !== ROLE.MANAGER) {
+            if (req.session.user?.role !== ROLE.ADMIN && req.session.user?.role !== ROLE.MANAGER) {
                 req.flash('message', 'You are not authorized to do this action!');
-                return res.redirect(`/admin/users/edit/${id.trim()}`);
+                return res.redirect(req.originalUrl ?? `/admin/users/edit/${id.trim()}`);
             }
         }
         try {
@@ -100,7 +100,7 @@ class AdminUserController {
         } catch (error) {
             await queryRunner.rollbackTransaction();
             req.flash('message', error.message ?? 'Can not update user!');
-            res.redirect(`/admin/users/edit/${id.trim()}`);
+            res.redirect(req.originalUrl ?? `/admin/users/edit/${id.trim()}`);
         } finally {
             await queryRunner.release();
         }

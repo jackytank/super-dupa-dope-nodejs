@@ -1,7 +1,8 @@
 import { Base } from './base';
-import { Entity, Column } from "typeorm";
+import { Entity, Column, OneToMany } from "typeorm";
 import { IsEmail, IsNotEmpty, MaxLength, MinLength, IsOptional, IsNotIn, IsIn } from "class-validator";
 import { errMsg } from '../constants';
+import { Company } from './company.entity';
 
 export enum UserRole {
   USER = 1,
@@ -60,4 +61,7 @@ export class User extends Base {
     { message: errMsg.ERR003('role') }
   )
   role!: number;
+
+  @OneToMany(() => Company, c => c.user)
+  companies: Company[]
 }

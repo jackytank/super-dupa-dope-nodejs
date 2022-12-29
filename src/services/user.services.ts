@@ -9,7 +9,7 @@ import { comparePassword, hashPassword } from '../utils/bcrypt';
 import { CustomApiResult, CustomDataTableResult, CustomValidateResult } from '../customTypings/express';
 import { Company } from '../entities/company.entity';
 import { UserProfile } from '../entities/user-profile.entity';
-import { isValidDate } from '../utils/common';
+import { isValidDate, setAllNull } from '../utils/common';
 import { AppDataSource } from '../DataSource';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -18,27 +18,20 @@ export class UserService {
 
     async verifyCredentials(username: string, password: string) {
         const foundUser = await this.userRepo.findOneBy({ username: username });
-
         if (!foundUser) {
             return null;
         }
-
         // validate password
         const passwordMatched = await comparePassword(password, foundUser!.password);
-
         if (!passwordMatched) {
             return null;
         }
-
         // update last_login
         // foundUser.lastLogin = getCurrentSystemDatetime();
         foundUser.updatedBy = foundUser.name;
-
         await this.userRepo.update(foundUser.id, foundUser);
-
         return foundUser;
     }
-
     async readCsvData(filePath: string, parser: csv.Parser): Promise<unknown[]> {
         const result: unknown[] = [];
         return await new Promise((resolve, reject) =>
@@ -88,32 +81,38 @@ export class UserService {
             console.log(error.message);
         }
         // users = await this.find();
-        return { data: users, status: 200 };
+        return { data: users, status: 200, count: users.length };
     }
     async getAllDataWithExtraPersonalInfo(query: Record<string, unknown>): Promise<CustomApiResult<User>> {
-        const { companyId } = query;
+        const { companyId, companyName } = query;
         const b = this.userRepo.createQueryBuilder('u');
-        let users: User[];
+        let users: User[] | null = null;
         try {
-            if (companyId) {
-                b.select([
-                    'u.id AS `id`',
-                    'u.role AS `role`',
-                    'u.username AS `username`',
-                    'c.id AS `companyId`',
-                    'c.name AS `companyName`',
-                    'p.phone AS `phone`',
-                    'p.address AS `address`',
-                    "CONCAT(p.lastname,' ', p.firstname) AS `fullname`",
-                ]);
+            b.select([
+                'u.id AS `id`',
+                'u.role AS `role`',
+                'u.username AS `username`',
+                'u.company_id AS `companyId`',
+                'c.name AS `companyName`',
+                'p.phone AS `phone`',
+                'p.address AS `address`',
+                "CONCAT(p.lastname,' ', p.firstname) AS `fullname`",
+            ]);
+            if (companyId || companyName) {
+                b.leftJoin(UserProfile, 'p', 'u.id = p.user_id');
                 b.innerJoin(Company, 'c', 'u.company_id = c.id');
-                b.innerJoin(UserProfile, 'p', 'u.id = p.user_id');
-                b.where('c.id = :companyId', { companyId: companyId });
-                users = await b.getRawMany();
-            } else {
-                users = await b.getMany();
+                b.where('');
+                if (companyId) {
+                    b.andWhere('c.id = :companyId', { companyId: companyId });
+                }
+                if (companyName) {
+                    b.andWhere('c.name = :companyName', { companyName: companyName });
+                }
             }
-            return { data: users, status: 200 };
+            users = await b.getRawMany();
+            const qry = b.getQueryAndParameters();
+            const count = users.length;
+            return { data: users, status: 200, count: count };
         } catch {
             return { message: `Error`, status: 500 };
         }
@@ -300,13 +299,15 @@ export class UserService {
         const recordsTotal: number = await this.userRepo.createQueryBuilder('user')
             .select('user')
             .getCount(); // get total records count
-        const recordsFiltered: number = recordsTotal; // get filterd records count
+        let recordsFiltered: number; // get filterd records count
         try {
-            data = await builder.getMany(); //get data
+            data = await builder.getRawMany(); //get data
+            recordsFiltered = await builder.getCount(); // get filterd records count
         } catch (error) {
             // if error then find all
             console.log(error);
             data = await this.userRepo.find();
+            recordsFiltered = await this.userRepo.count();
         }
         const returnData = {
             draw: query.draw as number,
@@ -317,43 +318,48 @@ export class UserService {
         return returnData;
     }
     async getSearchQueryBuilder(query: Record<string, unknown>, hasAnyLimitOrOffset: boolean): Promise<SelectQueryBuilder<User>> {
-        const { length, start, name, username, email, role, createdDateFrom, createdDateTo } = query;
-        const builder = this.userRepo.createQueryBuilder('user').where('');
+        const { length, start, name, username, email, role, createdDateFrom, createdDateTo, companyId, companyName } = setAllNull(query, { isEmpty: true });
+        const b = this.userRepo.createQueryBuilder('user').
+        select(['user.*','company.name as `company_name`'])
+        .leftJoin('companies', 'company', 'company.id = user.company_id');
+
         // let isFromAndToDateEqual = false;
         // check if queries exist then concat them with sql query
         if (hasAnyLimitOrOffset) {
+            let hasLimit = false;
             if (!_.isNil(length)) {
-                builder.limit(parseInt(length as string));
+                hasLimit = true;
+                b.limit(parseInt(length as string));
             }
             // check both start end length for error: typeorm RDBMS does not support OFFSET without LIMIT in SELECT statements
-            if (!_.isNil(start) && !_.isNil(length)) {
-                builder.offset(parseInt(start as string));
+            if (!_.isNil(start) && !_.isNil(length) && hasLimit) {
+                b.offset(parseInt(start as string));
             }
         }
         if (!_.isNil(createdDateFrom) && isValidDate(new Date(createdDateFrom as string))) {
-            builder.andWhere('Date(user.created_at) >= :fromDate', {
-                fromDate: `${createdDateFrom}`,
-            });
+            b.andWhere('Date(user.created_at) >= :fromDate', { fromDate: `${createdDateFrom}` });
         }
         if (!_.isNil(createdDateTo) && isValidDate(new Date(createdDateTo as string))) {
-            builder.andWhere('Date(user.created_at) <= :toDate', {
-                toDate: `${createdDateTo}`,
-            });
+            b.andWhere('Date(user.created_at) <= :toDate', { toDate: `${createdDateTo}` });
         }
         if (!_.isNil(name)) {
-            builder.andWhere('user.name LIKE :name', { name: `%${name}%` });
+            b.andWhere('user.name LIKE :name', { name: `%${name}%` });
         }
         if (!_.isNil(username)) {
-            builder.andWhere('user.username LIKE :username', {
-                username: `%${username}%`,
-            });
+            b.andWhere('user.username LIKE :username', { username: `%${username}%` });
         }
         if (!_.isNil(email)) {
-            builder.andWhere('user.email LIKE :email', { email: `%${email}%` });
+            b.andWhere('user.email LIKE :email', { email: `%${email}%` });
         }
         if (!_.isNil(role)) {
-            builder.andWhere('user.role IN (:role)', { role: role });
+            b.andWhere('user.role IN (:role)', { role: role });
         }
-        return builder;
+        if (!_.isNil(companyId)) {
+            b.andWhere('company.id = :companyId', { companyId: companyId });
+        }
+        if (!_.isNil(companyName)) {
+            b.andWhere('company.name LIKE :companyName', { companyName: `%${companyName}%` });
+        }
+        return b;
     }
 }

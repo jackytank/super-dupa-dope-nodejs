@@ -1,3 +1,4 @@
+import { CustomDataTableResult } from './../../../../customTypings/express/index';
 import { Request, Response } from 'express';
 import _ from 'lodash';
 import * as csv from 'csv-parse';
@@ -43,24 +44,24 @@ class AdminUserApiController {
 
     //for routing control purposes - START
     async getAll(req: Request, res: Response) {
-        const { take, limit, companyId } = req.query;
+        const { take, limit, companyId, companyName } = req.query;
         let result: CustomApiResult<User>;
-        if (companyId) {
-            result = await this.userService.getAllDataWithExtraPersonalInfo(
-                req.query,
-            );
+        if (companyId || companyName) {
+            result = await this.userService.getAllDataWithExtraPersonalInfo(req.query);
         } else {
-            result = await this.userService.getAllData(
-                take as string,
-                limit as string,
-            );
+            result = await this.userService.getAllData(take as string, limit as string);
         }
         return res.status(result.status as number).json(result);
     }
     async search(req: Request, res: Response) {
         // save req.query to session for export csv based on search query
         req.session.searchQuery = req.query;
-        return res.status(200).json(await this.userService.searchData(req.query));
+        try {
+            const data: CustomDataTableResult = await this.userService.searchData(req.query);
+            return res.status(200).json(data);
+        } catch (error) {
+            return res.status(500).json({ message: error.message, status: 500 });
+        }
     }
     async getOne(req: Request, res: Response) {
         const result = await this.userService.getOneData(parseInt(req.params.id));

@@ -1,18 +1,20 @@
 <% if (loginUser.username) { %>
-<nav id="sidebarMenu" class="collapse d-lg-block sidebar collapse bg-white">
-    <div class="position-sticky">
-        <div class="list-group list-group-flush mx-3 mt-4">
-            <!-- 1 -->
-            <a href="/" class="list-group-item list-group-item-action py-2 ripple <% if(typeof activeTab !== 'undefined') { %> <%= activeTab === 'dashboardTab'? 'active':'' %> <% } %>  " aria-current="true">
-                <i class="fas fa-tachometer-alt fa-fw me-3"></i><span>Main dashboard</span>
-            </a>
-            <!-- 2 -->
-            <a href="/admin/users/list" class="list-group-item list-group-item-action py-2 ripple <% if(typeof activeTab !== 'undefined') { %> <%= activeTab === 'listUserTab'? 'active':'' %> <% } %> ">
-                <i class="fas fa-chart-area fa-fw me-3"></i><span>User List</span>
-            </a>
-            <!-- 3 -->
-            <a href="/admin/users/addPage" class="<%= loginUser.role === 1? 'disabled':'' %>  list-group-item list-group-item-action py-2 ripple  <% if(typeof activeTab !== 'undefined') { %> <%= activeTab === 'addUserTab'? 'active':'' %> <% } %>  "><i class="fas fa-lock fa-fw me-3"></i><span>Add user</span></a>
+<aside>
+    <nav id="sidebarMenu" class="collapse d-lg-block sidebar collapse bg-white">
+        <div class="position-sticky">
+            <div class="list-group list-group-flush mx-3 mt-4">
+                <!-- 1 -->
+                <a href="/" class="list-group-item list-group-item-action py-2 ripple <% if(typeof activeTab !== 'undefined') { %> <%= activeTab === 'dashboardTab'? 'active':'' %> <% } %>  " aria-current="true">
+                    <i class="fas fa-tachometer-alt fa-fw me-3"></i><span>Main dashboard</span>
+                </a>
+                <!-- 2 -->
+                <a href="/admin/users/list" class="list-group-item list-group-item-action py-2 ripple <% if(typeof activeTab !== 'undefined') { %> <%= activeTab === 'listUserTab'? 'active':'' %> <% } %> ">
+                    <i class="fas fa-chart-area fa-fw me-3"></i><span>User List</span>
+                </a>
+                <!-- 3 -->
+                <a href="/admin/users/addPage" class="<%= loginUser.role === 1? 'disabled':'' %>  list-group-item list-group-item-action py-2 ripple  <% if(typeof activeTab !== 'undefined') { %> <%= activeTab === 'addUserTab'? 'active':'' %> <% } %>  "><i class="fas fa-lock fa-fw me-3"></i><span>Add user</span></a>
+            </div>
         </div>
-    </div>
-</nav>
+    </nav>
+</aside>
 <% } %>

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import moment from 'moment-timezone';
 import Big from 'big.js';
-import _ from 'lodash'
+import _ from 'lodash';
 import { generate } from 'generate-password';
 
 /**
@@ -72,8 +72,8 @@ export function toStringDate(
     format = format || 'YYYY/MM/DD';
     return date
         ? moment(date)
-              .tz('Asia/Tokyo')
-              .format(format)
+            .tz('Asia/Tokyo')
+            .format(format)
         : date;
 }
 
@@ -89,8 +89,8 @@ export function toStringDatetime(
     format = format || 'YYYY/MM/DD HH:mm:ss';
     return date
         ? moment(date)
-              .tz('Asia/Tokyo')
-              .format(format)
+            .tz('Asia/Tokyo')
+            .format(format)
         : date;
 }
 
@@ -139,4 +139,16 @@ export const bench = () => {
 
     return { start, end };
 };
+
+
+export const setAllNull = (obj: Record<string, unknown>, ifEl?: { isEmpty: boolean; }) => {
+    const result = obj;
+    Object.keys(result).forEach(key => {
+        if (ifEl && ifEl.isEmpty && result[key] === '') {
+            result[key] = null;
+        }
+    });
+    return result;
+};
+
 // tri - my own custom functions - END

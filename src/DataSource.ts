@@ -1,4 +1,4 @@
-import { createConnection, DataSource } from 'typeorm';
+import { DataSource } from 'typeorm';
 import logger from './winston';
 
 const AppDataSource = new DataSource({

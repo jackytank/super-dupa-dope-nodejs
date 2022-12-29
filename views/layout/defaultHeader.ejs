@@ -73,14 +73,14 @@
                     <% if(loginUser.name){ %>
                     <a class="nav-link dropdown-toggle hidden-arrow d-flex align-items-center" href="#" id="navbarDropdownMenuLink" role="button" data-mdb-toggle="dropdown" aria-expanded="false">
                         <span class="me-2"><%= loginUser.username %></span> <img src="https://mdbootstrap.com/img/Photos/Avatars/img (31).jpg" class="rounded-circle me-2" height="22" alt="" loading="lazy" />
-                        <span id="userAuthority" data-authority="<%= loginUser.role %> ">Role: <%= loginUser.role %> </span>
-                        <span id="user-id" data-userid="<%= loginUser.id %>"></span>
+                        <span id="user-role" data-user-role="<%= loginUser.role %> ">Role: <%= loginUser.role %> </span>
+                        <span id="user-id" data-user-id="<%= loginUser.id %>"></span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
                         <li><a class="dropdown-item" href="/logout?redirect=<%= logoutRedirect %> ">Logout</a></li>
                     </ul>
                     <% } else { %>
-                    <a class="nav-link" href="/login" id="loginATag">
+                    <a class="nav-link" href="/login" id="loginLink">
                         <span>Login</span>
                     </a>
                     <% } %>

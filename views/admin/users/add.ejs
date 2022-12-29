@@ -5,17 +5,10 @@
                 <h5 class="mb-0 text-center"><strong>ADD USER</strong></h5>
             </div>
         </div>
-        <!-- <div class="card-footer d-flex mb-3 justify-content-center">
-            <div class="btn-group">
-                <a href="/admin/users/export-pdf" class="btn btn-secondary">PDF</a>
-                <a href="/admin/users/export-excel" class="btn btn-secondary">EXCEL</a>
-                <a href="/admin/users/export-csv" class="btn btn-secondary">CSV</a>
-            </div>
-        </div> -->
     </section>
 
     <div class="container">
-        <form id="addUserForm" method="POST" action="/admin/users/addPage">
+        <form id="addUserForm" method="POST">
             <div class="row mb-4">
                 <div class="col-md-6 col-sm-12">
                     <label for="">Name:</label>
@@ -49,10 +42,12 @@
                 </select>
             </div>
             <!-- Submit button -->
-            <button type="submit" class="btn btn-primary btn-block mb-4" id="submitBtn">CREATE</button>
+            <button type="submit" class="btn btn-primary btn-block mb-4" id="createUserBtn">CREATE</button>
         </form>
     </div>
 </div>
+
+<script src="/asset/js/site/user/add.js"></script>
 
 <%- contentFor('pageTitle') %>
 Add

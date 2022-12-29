@@ -5,17 +5,10 @@
                 <h5 class="mb-0 text-center"><strong>EDIT USER</strong></h5>
             </div>
         </div>
-        <!-- <div class="card-footer d-flex mb-3 justify-content-center">
-            <div class="btn-group">
-                <a href="/admin/users/export-pdf" class="btn btn-secondary">PDF</a>
-                <a href="/admin/users/export-excel" class="btn btn-secondary">EXCEL</a>
-                <a href="/admin/users/export-csv" class="btn btn-secondary">CSV</a>
-            </div>
-        </div> -->
     </section>
 
     <div class="container">
-        <form id="editUserForm" method="POST" action="/admin/users/update">
+        <form id="editUserForm" method="POST">
             <div class="row mb-4">
                 <input type="text" id="" class="form-control" name="id" placeholder="ID" value="<%= user.id ? user.id: '' %>" hidden />
                 <div class="col-md-6 col-sm-12">
@@ -43,7 +36,7 @@
                 <a href="/admin/users/change-password/<%= user.id %> ">Change password?</a>
             </div>
             <!-- Submit button -->
-            <button type="button" class="btn btn-primary btn-block mb-4" id="submitBtn">UPDATE</button>
+            <button type="submit" class="btn btn-primary btn-block mb-4" id="submitBtn">UPDATE</button>
         </form>
     </div>
 </div>

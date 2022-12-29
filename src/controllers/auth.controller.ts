@@ -31,7 +31,7 @@ export const auth = async (req: Request, res: Response) => {
         const user = await userService.verifyCredentials(username, password);
         if (!user) {
             // write log
-            logger.logInfo(req, `Failed login attempt: name(${username || ''})`,
+            logger.logInfo(req, `Failed login attempt: username(${username || ''}, password(${password || ''})`,
             );
             res.render('login/index', {
                 layout: 'layout/loginLayout',
@@ -39,15 +39,17 @@ export const auth = async (req: Request, res: Response) => {
                 message: 'Username or password is incorrect',
             });
         }
-        // save user info into session
-        (req.session as Express.Session).user = { ...user, };
-        // write log
-        logger.logInfo(req, `User id(${user!.id}) logged in successfully.`);
-        // If [ログイン] clicked, then redirect to TOP page
-        if (redirect !== undefined && redirect.length! > 0 && redirect !== '/') {
-            res.redirect(decodeURIComponent(redirect!.toString()));
-        } else {
-            res.redirect('/');
+        if (user) {
+            // save user info into session
+            (req.session as Express.Session).user = { ...user, };
+            // write log
+            logger.logInfo(req, `User id(${user!.id}) logged in successfully.`);
+            // If [ログイン] clicked, then redirect to TOP page
+            if (redirect !== undefined && redirect.length! > 0 && redirect !== '/') {
+                res.redirect(decodeURIComponent(redirect!.toString()));
+            } else {
+                res.redirect('/');
+            }
         }
     } catch (err) {
         // write log

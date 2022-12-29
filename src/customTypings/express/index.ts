@@ -44,6 +44,7 @@ export type CustomApiResult<Entity> = {
     messages?: string[] | null;
     data?: Entity | Entity[] | null;
     status?: number;
+    count?: number;
 };
 
 export type CustomDataTableResult = {
