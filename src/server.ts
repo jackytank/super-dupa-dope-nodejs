@@ -1,4 +1,3 @@
-import './LoadEnv';
 import * as bodyParser from 'body-parser';
 import express from 'express';
 import expressEjsLayouts from 'express-ejs-layouts';
@@ -11,6 +10,7 @@ import * as moment from 'moment-timezone';
 import './DataSource';
 import flash from 'connect-flash';
 import cors from 'cors';
+import './LoadEnv'
 
 moment.tz.setDefault('Asia/Tokyo');
 
