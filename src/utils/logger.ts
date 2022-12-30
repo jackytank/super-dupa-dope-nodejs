@@ -31,8 +31,8 @@ export const logError = async (req: Request, error: string) => {
 
 /**
  * Write warning log
- * @param req
- * @param error
+ * @param req access request object
+ * @param message accept message string
  */
 export const logWarning = async (req: Request, message: string) => {
   winston.log(

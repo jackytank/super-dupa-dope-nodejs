@@ -85,6 +85,7 @@ $(function () {
                 },
                 {
                     data: 'id',
+                    className: 'limit-char',
                 },
                 {
                     data: 'name',
@@ -116,6 +117,7 @@ $(function () {
                 },
                 {
                     data: 'role',
+                    className: 'limit-char',
                 },
                 {
                     data: 'role',
@@ -296,13 +298,14 @@ $(function () {
             const errorModalOkBtn = document.querySelector(`#${modalOkBtnId}`);
             let _msg = ``;
             if (message) {
-                _msg += `
+                _msg = `
                         <h3>${status || ''}</h3>
                         <p>${message}</p>
                      `;
             }
+
             if (messages) {
-                _msg += `
+                _msg = `
                         <h3>${status || ''}</h3>
                         <ul class="text-center">
                             ${messages.map(msg => `<li class="row">${msg}</li>`)}
@@ -335,7 +338,7 @@ $(function () {
                     cache: false,
                     success: function (data) {
                         // location.reload();
-                        openErrorModalWithMsg('errorModal', 'errorModalMessage', 'errorModalOkBtn', data.status, data.message, data.messages, true);
+                        openErrorModalWithMsg('errorModal', 'errorModalMessage', 'errorModalOkBtn', data.status, null, data.messages, true);
                         console.log('Return data: ', JSON.stringify(data, null, 4));
                     },
                     error: function (req, stat, err) {

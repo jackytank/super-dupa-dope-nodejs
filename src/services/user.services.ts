@@ -9,7 +9,7 @@ import { comparePassword, hashPassword } from '../utils/bcrypt';
 import { CustomApiResult, CustomDataTableResult, CustomValidateResult } from '../customTypings/express';
 import { Company } from '../entities/company.entity';
 import { UserProfile } from '../entities/user-profile.entity';
-import { escapeHtml, isValidDate, setAllNull } from '../utils/common';
+import { isValidDate, setAllNull } from '../utils/common';
 import { AppDataSource } from '../DataSource';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -32,6 +32,11 @@ export class UserService {
         await this.userRepo.update(foundUser.id, foundUser);
         return foundUser;
     }
+    /**
+     * @param filePath accept absolute path
+     * @param parser accept csv.Parser type
+     * @returns return an array of unknown object
+     */
     async readCsvData(filePath: string, parser: csv.Parser): Promise<unknown[]> {
         const result: unknown[] = [];
         return await new Promise((resolve, reject) =>
@@ -56,6 +61,12 @@ export class UserService {
                 }),
         );
     }
+    /**
+     * 
+     * @param take equavalent to offset
+     * @param limit equivalent to limit
+     * @returns return CustomApiResult<User> with status, data, and count
+     */
     async getAllData(take?: string, limit?: string): Promise<CustomApiResult<User>> {
         const builder = this.userRepo.createQueryBuilder('user').select('user');
         let users: User[];
@@ -83,6 +94,11 @@ export class UserService {
         // users = await this.find();
         return { data: users, status: 200, count: users.length };
     }
+    /**
+     * 
+     * @param query accept express.Request.query
+     * @returns return user info combined with UserProfile and Company info of that user
+     */
     async getAllDataWithExtraPersonalInfo(query: Record<string, unknown>): Promise<CustomApiResult<User>> {
         const { companyId, companyName } = query;
         const b = this.userRepo.createQueryBuilder('u');
@@ -133,6 +149,12 @@ export class UserService {
             return { message: `Error when get one user`, status: 500 };
         }
     }
+    /**
+     * 
+     * @param user accept User object
+     * @param dbData if dbData is provided then it will not query to database to check username and email unique instead it will use dbData to check
+     * @returns return CustomValidateResult<User> with message, isValid, and datas
+     */
     async checkUsernameEmailUnique(user: User, dbData?: User[] | null): Promise<CustomValidateResult<User>> {
         const b: SelectQueryBuilder<User> = this.userRepo.createQueryBuilder('user').where('');
         let result = {
@@ -194,6 +216,14 @@ export class UserService {
             datas: findUsers,
         };
     }
+    /**
+     * 
+     * @param user accept User object
+     * @param dbData it will use dbData array to check username and email unique
+     * @param queryRunner accept QueryRunner object
+     * @param options if wantValidate is true then it will check username and email unique
+     * @returns return CustomApiResult<User> with message, data, and status
+     */
     async insertData(user: User, dbData: User[] | null, queryRunner: QueryRunner, options: { wantValidate?: boolean; isPasswordHash?: boolean; },): Promise<CustomApiResult<User>> {
         if (options.wantValidate) {
             const validateUser = await this.checkUsernameEmailUnique(user, dbData);
@@ -210,7 +240,6 @@ export class UserService {
         try {
             let insertedUser: User | InsertResult;
             // encode special character to prevent html injection
-            // const escapedUser: User = Object.assign(new User(), { ...Object.values(user).map(val => (typeof val === 'string' ? escapeHtml(val) : val)) });
             if (!user.companyId) {
                 user.companyId = 100001;
             }
@@ -232,6 +261,14 @@ export class UserService {
             return { message: 'Error when inserting user!', status: 500 };
         }
     }
+    /**
+     * 
+     * @param user accept User object
+     * @param dbData if dbData is provided then it will not query to database to check username and email unique instead it will use dbData to check
+     * @param queryRunner accept QueryRunner object
+     * @param options if wantValidate is true then it will check username and email unique, if user id is provided then it will not check username and email unique
+     * @returns return CustomApiResult<User> with message, data, and status
+     */
     async updateData(user: User, dbData: User[] | null, queryRunner: QueryRunner, options: { wantValidate?: boolean; }): Promise<CustomApiResult<User>> {
         let validateUser = null;
         if (options.wantValidate) {
@@ -258,7 +295,6 @@ export class UserService {
         try {
             let updatedUser: User | UpdateResult;
             // encode special character to prevent html injection
-            // const escapedUser: User = Object.assign(new User(), { ...Object.values(user).map(val => (typeof val === 'string' ? escapeHtml(val) : val)) });
             if (dbData) {
                 updatedUser = await queryRunner.manager.save(User, user);
             } else {
@@ -276,6 +312,11 @@ export class UserService {
             return { message: `Error when updating user!`, status: 500 };
         }
     }
+    /**
+     * 
+     * @param id accept user id as number
+     * @returns return CustomApiResult<User> with message, data, and status
+     */
     async removeData(id: number): Promise<CustomApiResult<User>> {
         try {
             const userToRemove: User | null = await this.userRepo.findOneBy({ id });
@@ -288,6 +329,11 @@ export class UserService {
             return { message: `Error when removing user`, status: 500 };
         }
     }
+    /**
+     * it will get QueryBuilder from getSearchQueryBuilder function and then it will get data from database based on query 
+     * @param query accept query object
+     * @returns return CustomDataTableResult with draw, recordsTotal, recordsFiltered, and data mainly for dataTable in frontend, data is array of User entity plus company_name column
+     */
     async searchData(query: Record<string, unknown>): Promise<CustomDataTableResult> {
         const builder = await this.getSearchQueryBuilder(query, true);
         let data: string | User[];

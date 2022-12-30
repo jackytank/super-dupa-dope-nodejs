@@ -55,6 +55,7 @@
         "express-validator": "^6.14.2",
         "generate-password": "^1.7.0",
         "http-status": "^1.5.3",
+        "isomorphic-dompurify": "^0.24.0",
         "lodash": "^4.17.21",
         "moment": "^2.29.4",
         "moment-timezone": "^0.5.40",

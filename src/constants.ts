@@ -71,6 +71,9 @@ export const errMsg = {
     ERR007: (field: string, type: string) => {
         return `${field.toUpperCase()} is not of type ${type.toLowerCase()}`;
     },
+    ERR008: (field: string) => {
+        return `${field.toUpperCase()} is contains blacklisted words`;
+    },
 };
 
 export const _1MB = 1024 * 1024;
@@ -90,4 +93,27 @@ export const ROLE = {
 };
 
 export const ROLES = Object.values(ROLE);
+
+export const blackListWords = [
+    'img',
+    'audio',
+    'body',
+    'script',
+    'cookie',
+    'console',
+    'document',
+    'element',
+    'session',
+    'localStorage',
+    'window',
+    'button',
+    'canvas',
+    'html',
+    'iframe',
+    'image',
+    'img',
+    'input',
+    'link',
+    'listing',
+]
 // tri - my own custom constants - END

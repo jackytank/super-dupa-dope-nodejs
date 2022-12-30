@@ -606,12 +606,16 @@ const escapeHtml = (htmlStr) => {
 };
 
 const unEscapeHtml = (htmlStr) => {
-  htmlStr = htmlStr.replace(/&lt;/g, "<");
-  htmlStr = htmlStr.replace(/&gt;/g, ">");
-  htmlStr = htmlStr.replace(/&quot;/g, "\"");
-  htmlStr = htmlStr.replace(/&#39;/g, "\'");
-  htmlStr = htmlStr.replace(/&amp;/g, "&");
-  return htmlStr;
+  if (htmlStr == null) {
+    return htmlStr;
+  } else {
+    htmlStr = htmlStr.replace(/&lt;/g, "<");
+    htmlStr = htmlStr.replace(/&gt;/g, ">");
+    htmlStr = htmlStr.replace(/&quot;/g, "\"");
+    htmlStr = htmlStr.replace(/&#39;/g, "\'");
+    htmlStr = htmlStr.replace(/&amp;/g, "&");
+    return htmlStr;
+  }
 };
 
 // tri - my own custom script - END

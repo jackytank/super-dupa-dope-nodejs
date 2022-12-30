@@ -151,26 +151,40 @@ export const setAllNull = (obj: Record<string, unknown>, ifEl?: { isEmpty: boole
     return result;
 };
 
-export const setAllArrayObjEscapeHtml = (arr: unknown[]) => {
-    const result = [];
-    
+const escapeHtml = (htmlStr: string) => {
+    return htmlStr != null ?
+        htmlStr.replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;") : htmlStr;
 };
 
-export const escapeHtml = (htmlStr: string) => {
-    return htmlStr.replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
+const unEscapeHtml = (htmlStr: string) => {
+    if (htmlStr == null) {
+        return htmlStr;
+    } else {
+        htmlStr = htmlStr.replace(/&lt;/g, "<");
+        htmlStr = htmlStr.replace(/&gt;/g, ">");
+        htmlStr = htmlStr.replace(/&quot;/g, "\"");
+        htmlStr = htmlStr.replace(/&#39;/g, "\'");
+        htmlStr = htmlStr.replace(/&amp;/g, "&");
+        return htmlStr;
+    }
 };
 
-export const unEscapeHtml = (htmlStr: string) => {
-    htmlStr = htmlStr.replace(/&lt;/g, "<");
-    htmlStr = htmlStr.replace(/&gt;/g, ">");
-    htmlStr = htmlStr.replace(/&quot;/g, "\"");
-    htmlStr = htmlStr.replace(/&#39;/g, "\'");
-    htmlStr = htmlStr.replace(/&amp;/g, "&");
-    return htmlStr;
+/**
+ * @param accept an object 
+ * @returns return an object with escaped properties
+ */
+
+export const escapeObjProps = (obj: { [key: string]: unknown; }) => {
+    let tmp: { [key: string]: unknown; } = {};
+    Object.keys(obj).map(key => {
+        tmp = { ...obj };
+        tmp[key] = typeof tmp[key] === 'string' ? escapeHtml(tmp[key] as string) : tmp[key];
+    });
+    return tmp;
 };
 
 

@@ -22,8 +22,13 @@ import * as logger from '../utils/logger';
 //     };
 // };
 
+
+/**
+ * Permit user by comparing list of roles to user session role, permit user if req.params or req.body has a certain property equal to a certain property of user session
+ */
 function allow(options: {
     roles: number[];
+    resAsApi: boolean;
     permitIf?: {
         userSessionPropEqualPropFrom?: {
             params?: {
@@ -61,18 +66,48 @@ function allow(options: {
             next();
             return;
         } else {
-            logger.logWarning(req, messages.FORBIDDEN);
-            res.render('errors/index', {
-                title: titleMessageError.FORBIDDEN,
-                content: messages.FORBIDDEN,
-            });
-            return;
-            // res.status(403).json({ status: 403, message: 'Forbidden' });
+            if (options.resAsApi === true) {
+                return res.status(403).json({ status: 403, message: 'Forbidden' });
+            }
+            if (options.resAsApi === false || options.resAsApi === undefined || options.resAsApi === null) {
+                logger.logWarning(req, messages.FORBIDDEN);
+                return res.render('errors/index', {
+                    title: titleMessageError.FORBIDDEN,
+                    content: messages.FORBIDDEN,
+                });
+            }
         }
     };
 }
-
-export const defaultAllow = allow({ roles: [ROLE.ADMIN, ROLE.MANAGER] });
-export const allowParams = allow({ roles: [ROLE.ADMIN, ROLE.MANAGER], permitIf: { userSessionPropEqualPropFrom: { params: { whichProp: 'id' } } } });
-export const allowBody = allow({ roles: [ROLE.ADMIN, ROLE.MANAGER], permitIf: { userSessionPropEqualPropFrom: { body: { whichProp: 'id' } } } });
-export const allowBoth = allow({ roles: [ROLE.ADMIN, ROLE.MANAGER], permitIf: { userSessionPropEqualPropFrom: { params: { whichProp: 'id' }, body: { whichProp: 'id' } } } });
+/**
+ * 
+ * @param options accept resAsApi as boolean
+ * @returns as http status code 403 if options.resAsApi is true, otherwise render error page
+ */
+export const defaultAllow = (options: { resAsApi: boolean; }) => {
+    return allow({ roles: [ROLE.ADMIN, ROLE.MANAGER], resAsApi: options.resAsApi });
+};
+/**
+ * 
+ * @param options accept resAsApi as boolean
+ * @returns return as http status code 403 if options.resAsApi is true, otherwise render error page
+ */
+export const allowParams = (options: { resAsApi: boolean; }) => {
+    return allow({ roles: [ROLE.ADMIN, ROLE.MANAGER], resAsApi: options.resAsApi, permitIf: { userSessionPropEqualPropFrom: { params: { whichProp: 'id' } } } });
+};
+/**
+ * 
+ * @param options accept resAsApi as boolean
+ * @returns return as http status code 403 if options.resAsApi is true, otherwise render error page
+ */
+export const allowBody = (options: { resAsApi: boolean; }) => {
+    return allow({ roles: [ROLE.ADMIN, ROLE.MANAGER], resAsApi: options.resAsApi, permitIf: { userSessionPropEqualPropFrom: { body: { whichProp: 'id' } } } });
+};
+/**
+ * 
+ * @param options accept resAsApi as boolean
+ * @returns return as http status code 403 if options.resAsApi is true, otherwise render error page
+ */
+export const allowBoth = (options: { resAsApi: boolean; }) => {
+    return allow({ roles: [ROLE.ADMIN, ROLE.MANAGER], resAsApi: options.resAsApi, permitIf: { userSessionPropEqualPropFrom: { params: { whichProp: 'id' }, body: { whichProp: 'id' } } } });
+};
