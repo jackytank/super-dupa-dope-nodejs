@@ -42,6 +42,7 @@ export const auth = async (req: Request, res: Response) => {
         if (user) {
             // save user info into session
             (req.session as Express.Session).user = { ...user, };
+            req.user.isAuthorized = true;
             // write log
             logger.logInfo(req, `User id(${user!.id}) logged in successfully.`);
             // If [ログイン] clicked, then redirect to TOP page
@@ -66,6 +67,7 @@ export const auth = async (req: Request, res: Response) => {
  */
 export const logout = async (req: Request, res: Response) => {
     req.user.destroy();
+    req.session.destroy();
     const { redirect } = req.query;
     // write log
     logger.logInfo(req, 'User logged out successfully.');

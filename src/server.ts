@@ -1,16 +1,16 @@
-import './LoadEnv'
+import './LoadEnv';
 import * as bodyParser from 'body-parser';
 import express from 'express';
 import expressEjsLayouts from 'express-ejs-layouts';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import favicon from 'serve-favicon';
-import errorHandler from './middlewares/errorHandler';
 import router from './routes';
 import * as moment from 'moment-timezone';
 import './DataSource';
 import flash from 'connect-flash';
 import cors from 'cors';
+import { errorHandler } from './middlewares/errorHandler';
 
 moment.tz.setDefault('Asia/Tokyo');
 
@@ -35,6 +35,8 @@ app.use(session({
     resave: true,
     saveUninitialized: true,
     cookie: {
+        httpOnly: true, // prevent client side JS from reading the cookie (XSS attack),
+        // secure: true, // only transmit cookie over https, prevent cookie from being stolen when using http, turn this on when in production
         maxAge: 3600000,
     }
 }));

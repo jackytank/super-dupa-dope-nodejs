@@ -29,7 +29,7 @@ export const commonErrorProcess = (err: any, req: Request, res: Response) => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default (err: any, req: Request, res: Response, next: NextFunction) => {
+export const errorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
     if (err && (!err.code || err.code !== 'ERR_HTTP_HEADERS_SENT')) {
         logger.logError(req, err);
     }

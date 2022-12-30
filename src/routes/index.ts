@@ -10,14 +10,14 @@ import viewHelper from '../middlewares/viewHelper';
 import adminUserRouter from './user/user.route';
 import adminUserApiRouter from './user/user.api.route';
 import { noCache } from '../middlewares/noCache';
-
+import { authentication } from '../middlewares/authentication';
 const router = Router();
 
 router.use(sessionMiddleWare);
 router.use(userMiddleware);
 router.use(noCache) // disable cache to prevent back button issue after logout
 router.use('/', authRouter);
-// router.use(auth);
+router.use(authentication);
 router.use(viewHelper);
 
 router.get('/', (req, res) => {

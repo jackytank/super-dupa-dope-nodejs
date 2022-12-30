@@ -563,6 +563,8 @@ jQuery.fn.extend({
   }
 });
 
+// tri - my own custom script - START
+
 // Example starter JavaScript for disabling form submissions if there are invalid fields
 (() => {
   'use strict';
@@ -593,3 +595,23 @@ function checkPasswordMatch(confirmPass, submitBtnId) {
     submit.disabled = false;
   }
 }
+
+const escapeHtml = (htmlStr) => {
+  return htmlStr != null ?
+    htmlStr.replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;") : htmlStr;
+};
+
+const unEscapeHtml = (htmlStr) => {
+  htmlStr = htmlStr.replace(/&lt;/g, "<");
+  htmlStr = htmlStr.replace(/&gt;/g, ">");
+  htmlStr = htmlStr.replace(/&quot;/g, "\"");
+  htmlStr = htmlStr.replace(/&#39;/g, "\'");
+  htmlStr = htmlStr.replace(/&amp;/g, "&");
+  return htmlStr;
+};
+
+// tri - my own custom script - END

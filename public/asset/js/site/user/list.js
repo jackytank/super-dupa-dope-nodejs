@@ -90,28 +90,28 @@ $(function () {
                     data: 'name',
                     className: 'limit-char',
                     render: function (data, type, row, meta) {
-                        return data;
+                        return escapeHtml(data);
                     },
                 },
                 {
                     data: 'username',
                     className: 'limit-char',
                     render: function (data, type, row, meta) {
-                        return data;
+                        return escapeHtml(data);
                     },
                 },
                 {
                     data: 'password',
                     className: 'limit-char',
                     render: function (data, type, row, meta) {
-                        return data;
+                        return escapeHtml(data);
                     },
                 },
                 {
                     data: 'email',
                     className: 'limit-char',
                     render: function (data, type, row, meta) {
-                        return data;
+                        return escapeHtml(data);
                     },
                 },
                 {
@@ -128,7 +128,7 @@ $(function () {
                     data: 'company_name',
                     className: 'limit-char',
                     render: function (data, type, row, meta) {
-                        return data;
+                        return escapeHtml(data);
                     }
                 },
                 {
@@ -140,6 +140,9 @@ $(function () {
                 {
                     data: 'created_by',
                     className: 'limit-char',
+                    render: function (data, type, row, meta) {
+                        return escapeHtml(data);
+                    }
                 },
                 {
                     data: 'updated_at',
@@ -150,6 +153,9 @@ $(function () {
                 {
                     data: 'updated_by',
                     className: 'limit-char',
+                    render: function (data, type, row, meta) {
+                        return escapeHtml(data);
+                    }
                 },
                 {
                     data: null,

@@ -9,7 +9,7 @@ import { comparePassword, hashPassword } from '../utils/bcrypt';
 import { CustomApiResult, CustomDataTableResult, CustomValidateResult } from '../customTypings/express';
 import { Company } from '../entities/company.entity';
 import { UserProfile } from '../entities/user-profile.entity';
-import { isValidDate, setAllNull } from '../utils/common';
+import { escapeHtml, isValidDate, setAllNull } from '../utils/common';
 import { AppDataSource } from '../DataSource';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -209,6 +209,8 @@ export class UserService {
         }
         try {
             let insertedUser: User | InsertResult;
+            // encode special character to prevent html injection
+            // const escapedUser: User = Object.assign(new User(), { ...Object.values(user).map(val => (typeof val === 'string' ? escapeHtml(val) : val)) });
             if (!user.companyId) {
                 user.companyId = 100001;
             }
@@ -255,6 +257,8 @@ export class UserService {
         }
         try {
             let updatedUser: User | UpdateResult;
+            // encode special character to prevent html injection
+            // const escapedUser: User = Object.assign(new User(), { ...Object.values(user).map(val => (typeof val === 'string' ? escapeHtml(val) : val)) });
             if (dbData) {
                 updatedUser = await queryRunner.manager.save(User, user);
             } else {

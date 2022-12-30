@@ -11,33 +11,29 @@ export const userExpressValidationRule = (options: { hasRetype: boolean; hasPass
             .not()
             .isEmpty()
             .withMessage(errMsg.ERR001('name'))
-            .trim()
-            .escape(),
+            .trim(),
+        // .escape(),
         body('username')
             .isLength({ max: 255 })
             .not()
             .isEmpty()
             .withMessage(errMsg.ERR001('username'))
-            .trim()
-            .escape(),
-        // body('retype')
-        //     .optional({ checkFalsy: true })
-        //     .not()
-        //     .isEmpty().withMessage(errMsg.ERR001('retype'))
-        //     .custom((value, { req }) => value === req.body.password).withMessage(errMsg.ERR004('retype', 'password')),
+            .trim(),
+        // .escape(),
         body('retype')
             .custom((value, { req }) => {
                 return options.hasRetype ? value === req.body.password : true;
             })
-            .withMessage(errMsg.ERR004('retype', 'password')),
+            .withMessage(errMsg.ERR004('retype', 'password'))
+            .trim(),
+        // .escape(),
         body('email')
             .isLength({ max: 255 })
             .isEmail()
             .withMessage(errMsg.ERR003('email'))
-            .trim()
-            .escape(),
+            .trim(),
+        // .escape(),
         body('role')
-            // .not()
             .isIn(Object.values(UserRole).concat(Object.values(UserRole).map((n) => n + "")))  // Ex: [1, 2, 3, '1', '2', '3']
             .withMessage(errMsg.ERR003('role')),
     ];
@@ -47,8 +43,8 @@ export const userExpressValidationRule = (options: { hasRetype: boolean; hasPass
             .isLength({ min: 6, max: 20 })
             .not()
             .isEmpty()
-            .trim()
-            .escape());
+            .trim());
+        // .escape());
     }
     return ruleArr;
 };

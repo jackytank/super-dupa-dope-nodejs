@@ -8,7 +8,7 @@ import { NextFunction, Request, Response } from 'express';
 /**
  * If the user is not authorized, then redirect to login page
  */
-export default async (req: Request, res: Response, next: NextFunction) => {
+export const authentication = async (req: Request, res: Response, next: NextFunction) => {
     if (!req.user.isAuthorized) {
         res.redirect(`/login?redirect=${encodeURIComponent(req.originalUrl)}`);
     } else {
