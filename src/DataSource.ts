@@ -18,10 +18,14 @@ const AppDataSource = new DataSource({
 AppDataSource.initialize()
     .then(connection => {
         logger.info(`Database connected. On port ${process.env.TYPEORM_PORT}`);
+        console.log(`Database connected. On port ${process.env.TYPEORM_PORT}`);
+
     })
     .catch(err => {
         logger.error(err);
         logger.error('Error establishing a database connection.');
+        console.log('Error establishing a database connection.', err);
+
     });
 
 export { AppDataSource };

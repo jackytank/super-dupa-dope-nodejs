@@ -13,7 +13,7 @@
         "format": "npm run prettier",
         "prettier": "prettier src/*/*.ts -- --write",
         "eslint": "eslint src/*/*.ts --ignore-pattern src/migrations/*.ts --fix",
-        "build": "npm install typescript && npx tsc",
+        "build": "tsc",
         "start": "npm run build && node -r source-map-support/register .",
         "migrate:create": "ts-node ./node_modules/typeorm/cli.js migration:create -n",
         "migrate:up": "ts-node ./node_modules/typeorm/cli.js migration:run",

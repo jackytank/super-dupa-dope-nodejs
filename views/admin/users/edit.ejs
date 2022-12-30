@@ -1,51 +1,24 @@
 <div class="container pt-4">
-    <section class="mb-4">
-        <div class="card">
-            <div class="card-header py-3">
-                <h5 class="mb-0 text-center"><strong>EDIT USER</strong></h5>
-            </div>
-        </div>
-    </section>
+	<section class="mb-4">
+		<div class="card">
+			<div class="card-header py-3">
+				<h5 class="mb-0 text-center"><strong>EDIT USER</strong></h5>
+			</div>
+		</div>
+	</section>
 
-    <div class="container">
-        <form id="editUserForm" class="needs-validation" method="POST" novalidate>
-            <div class="row mb-4">
-                <input type="text" id="" class="form-control" name="id" placeholder="ID" required value="<%= user.id ? user.id: '' %>" hidden />
-                <div class="col-md-6 col-sm-12">
-                    <label for="">Name:</label>
-                    <input type="text" id="" class="form-control" name="name" maxlength="20" placeholder="Name" required value="<%= user.name ? user.name: '' %>" />
-                    <div class="invalid-feedback">Name is required.</div>
-                </div>
-                <div class="col-md-6 col-sm-12">
-                    <label for="">Username:</label>
-                    <input type="text" id="" class="form-control" name="username" maxlength="20" placeholder="Username" required value="<%= user.username ? user.username: '' %>" />
-                    <div class="invalid-feedback">Username is required.</div>
-                </div>
-            </div>
-            <div class="mb-4">
-                <label for="">Email:</label>
-                <input type="email" id="email" class="form-control" name="email" pattern="^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$" placeholder="Email" required value="<%= user.email ? user.email: '' %>" />
-                <div class="invalid-feedback">Email must be a valid email.</div>
-            </div>
-            <div class="mb-4">
-                <label for="selectRole">Role: </label>
-                <select name="role" class="" id="selectRole" required>
-                    <option value="1" <%=user.role===1? 'selected' :'' %>>1 - User</option>
-                    <option value="2" <%=user.role===2? 'selected' :'' %>>2 - Admin</option>
-                    <option value="3" <%=user.role===3? 'selected' :'' %>>3 - Manager</option>
-                </select>
-                <div class="invalid-feedback">Please choose a role.</div>
-            </div>
-            <div class="mb-4">
-                <a href="/admin/users/change-password/<%= user.id %> ">Change password?</a>
-            </div>
-            <!-- Submit button -->
-            <button type="submit" class="btn btn-primary btn-block mb-4" id="submitBtn">UPDATE</button>
-        </form>
-    </div>
+	<div class="container">
+		<%- include('./_form.ejs', {
+            formId: 'userForm',
+            formMethod: 'POST',
+            formPurpose: 'editUser',
+            submitBtnId: 'submitBtn',
+            userData: user
+        }) %>
+	</div>
 </div>
 
-<script src="/asset/js/site/user/edit.js"></script>
+<script src="/asset/js/site/user/addAndEdit.js"></script>
 
 <%- contentFor('pageTitle') %>
 Edit

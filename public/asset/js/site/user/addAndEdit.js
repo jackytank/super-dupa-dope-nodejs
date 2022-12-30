@@ -13,9 +13,9 @@ $(function () {
      * Form validation
      */
     function init() {
-        formIdStr = '#addUserForm';
+        formIdStr = '#userForm';
         formElement = $(formIdStr);
-        submitBtn = $('#createUserBtn');
+        submitBtn = $('#submitBtn');
     }
 
     function formValidation() {
