@@ -1,12 +1,11 @@
-import {
-    InsertResult, QueryRunner, SelectQueryBuilder, UpdateResult,
-} from 'typeorm';
+import { InsertResult, QueryRunner, SelectQueryBuilder, UpdateResult } from 'typeorm';
 import _ from 'lodash';
 import * as fs from 'fs';
 import * as csv from 'csv-parse';
+import * as nodemailer from 'nodemailer';
 import { User } from '../entities/user.entity';
 import { comparePassword, hashPassword } from '../utils/bcrypt';
-import { CustomApiResult, CustomDataTableResult, CustomValidateResult } from '../customTypings/express';
+import { CustomEntityApiResult, CustomDataTableResult, CustomValidateResult, CustomApiResult } from '../customTypings/express';
 import { Company } from '../entities/company.entity';
 import { UserProfile } from '../entities/user-profile.entity';
 import { isValidDate, setAllNull } from '../utils/common';
@@ -67,7 +66,7 @@ export class UserService {
      * @param limit equivalent to limit
      * @returns return CustomApiResult<User> with status, data, and count
      */
-    async getAllData(take?: string, limit?: string): Promise<CustomApiResult<User>> {
+    async getAllData(take?: string, limit?: string): Promise<CustomEntityApiResult<User>> {
         const builder = this.userRepo.createQueryBuilder('user').select('user');
         let users: User[];
         try {
@@ -99,7 +98,7 @@ export class UserService {
      * @param query accept express.Request.query
      * @returns return user info combined with UserProfile and Company info of that user
      */
-    async getAllDataWithExtraPersonalInfo(query: Record<string, unknown>): Promise<CustomApiResult<User>> {
+    async getAllDataWithExtraPersonalInfo(query: Record<string, unknown>): Promise<CustomEntityApiResult<User>> {
         const { companyId, companyName } = query;
         const b = this.userRepo.createQueryBuilder('u');
         let users: User[] | null = null;
@@ -132,7 +131,7 @@ export class UserService {
             return { message: `Error`, status: 500 };
         }
     }
-    async getOneData(id: number): Promise<CustomApiResult<User>> {
+    async getOneData(id: number): Promise<CustomEntityApiResult<User>> {
         try {
             const findUser: User | null = await this.userRepo.findOne({
                 where: { id: id },
@@ -224,7 +223,7 @@ export class UserService {
      * @param options if wantValidate is true then it will check username and email unique
      * @returns return CustomApiResult<User> with message, data, and status
      */
-    async insertData(user: User, dbData: User[] | null, queryRunner: QueryRunner, options: { wantValidate?: boolean; isPasswordHash?: boolean; },): Promise<CustomApiResult<User>> {
+    async insertData(user: User, dbData: User[] | null, queryRunner: QueryRunner, options: { wantValidate?: boolean; isPasswordHash?: boolean; },): Promise<CustomEntityApiResult<User>> {
         if (options.wantValidate) {
             const validateUser = await this.checkUsernameEmailUnique(user, dbData);
             if (!validateUser.isValid) {
@@ -269,7 +268,7 @@ export class UserService {
      * @param options if wantValidate is true then it will check username and email unique, if user id is provided then it will not check username and email unique
      * @returns return CustomApiResult<User> with message, data, and status
      */
-    async updateData(user: User, dbData: User[] | null, queryRunner: QueryRunner, options: { wantValidate?: boolean; }): Promise<CustomApiResult<User>> {
+    async updateData(user: User, dbData: User[] | null, queryRunner: QueryRunner, options: { wantValidate?: boolean; }): Promise<CustomEntityApiResult<User>> {
         let validateUser = null;
         if (options.wantValidate) {
             validateUser = await this.checkUsernameEmailUnique(user, dbData);
@@ -317,7 +316,7 @@ export class UserService {
      * @param id accept user id as number
      * @returns return CustomApiResult<User> with message, data, and status
      */
-    async removeData(id: number): Promise<CustomApiResult<User>> {
+    async removeData(id: number): Promise<CustomEntityApiResult<User>> {
         try {
             const userToRemove: User | null = await this.userRepo.findOneBy({ id });
             if (!userToRemove) {
@@ -400,5 +399,36 @@ export class UserService {
             b.andWhere('company.name LIKE :companyName', { companyName: `%${companyName}%` });
         }
         return b;
+    }
+    async sendEmail(options: { from: string, to: string, subject: string, content: string; }): Promise<CustomApiResult> {
+        try {
+            const acc = await nodemailer.createTestAccount();
+            const transporter = nodemailer.createTransport({
+                host: acc.smtp.host,
+                port: acc.smtp.port,
+                secure: acc.smtp.secure, // true for 465, false for other ports
+                auth: {
+                    user: acc.user,
+                    pass: acc.pass
+                }
+            });
+
+            const info = await transporter.sendMail({
+                from: options.from,
+                to: options.to,
+                subject: options.subject,
+                text: options.content,
+            });
+
+            console.log("Message sent: %s", info.messageId);
+            // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
+
+            // Preview only available when sending through an Ethereal account
+            console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+            return { message: `Email sent successfully`, status: 200 };
+        } catch (error) {
+            console.log(error);
+            return { message: `Error when sending email`, status: 500 };
+        }
     }
 }

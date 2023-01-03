@@ -12,6 +12,8 @@ adminUserRouter.use('/edit/:id', allowBoth({ resAsApi: false }));
 // base path: /admin/users/
 adminUserRouter.get('/addPage', AdminUserController.addPage);
 adminUserRouter.post('/addPage', createUserLimiter, userExpressValidationRule({ hasRetype: true, hasPass: true }), expressValidateUser, AdminUserController.createNewUser); // add middleware for validate req.body and is exist username, email
+adminUserRouter.get('/contact', AdminUserController.contactPage);
+adminUserRouter.post('/contact', AdminUserController.sendContact);
 adminUserRouter.get('/edit/:id', AdminUserController.editPage);
 adminUserRouter.post('/edit/:id', userExpressValidationRule({ hasRetype: false, hasPass: false }), expressValidateUser, AdminUserController.update);
 adminUserRouter.get('/list', AdminUserController.listPage);

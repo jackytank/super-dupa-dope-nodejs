@@ -1,16 +1,14 @@
-import dotenv from 'dotenv';
+import * as dotenv from 'dotenv';
 import commandLineArgs from 'command-line-args';
 import logger from './winston';
-import path from 'path';
 
 logger.info(`NODE_ENV: ${process.env.NODE_ENV || ''}`);
 
 if (process.env.NODE_ENV) {
     // Set the env file
     const result = dotenv.config({
-        path: path.join(__dirname, `../env/${process.env.NODE_ENV}.env`),
+        path: `./env/${process.env.NODE_ENV}.env`,
     });
-    console.log(path.join(__dirname, `../env/${process.env.NODE_ENV}.env`));
 
     if (result.error) {
         throw result.error;
@@ -25,9 +23,10 @@ if (process.env.NODE_ENV) {
             type: String,
         },
     ]);
+
     // Set the env file
     const result = dotenv.config({
-        path: path.join(__dirname, `../env/${options.env}.env`),
+        path: `./env/${options.env}.env`,
     });
 
     if (result.error) {

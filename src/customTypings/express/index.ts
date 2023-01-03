@@ -29,22 +29,26 @@ declare global {
                     endpoint: string;
                     accessToken?: string;
                     refreshToken?: string;
-                    storeToken?(token: { accessToken: string; refreshToken: string }): void;
+                    storeToken?(token: { accessToken: string; refreshToken: string; }): void;
                 };
                 destroy(): void;
             };
             flash(message: string, value?: unknown): string[];
-            consumeSession<X>(): { formData?: X; message?: IMessage };
+            consumeSession<X>(): { formData?: X; message?: IMessage; };
         }
     }
 }
 
-export type CustomApiResult<Entity> = {
+export type CustomEntityApiResult<Entity> = {
     message?: string | null;
     messages?: string[] | null;
     data?: Entity | Entity[] | null;
     status?: number;
     count?: number;
+};
+export type CustomApiResult = {
+    status?: number;
+    message?: string | null;
 };
 
 export type CustomDataTableResult = {

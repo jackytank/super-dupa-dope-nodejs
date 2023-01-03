@@ -1,0 +1,57 @@
+<div class="container pt-4">
+	<section class="mb-4">
+		<div class="card">
+			<div class="card-header py-3">
+				<h5 class="mb-0 text-center"><strong>CONTACT IT DEPARTMENT </strong></h5>
+			</div>
+		</div>
+	</section>
+
+	<div class="container">
+		<!-- start -->
+		<div class="row justify-content-center">
+			<div class="col-md-6 col-sm-12">
+				<form class="needs-validation" novalidate method="post" id="contactForm">
+					<div class="card" id="changePasswordModal">
+						<div class="card-header">
+							<h5 class="modal-title" id="exampleModalLabel">Send contact email</h5>
+						</div>
+						<div class="card-body">
+							<div class="row mb-4">
+								<div class="col col-sm-12">
+									<input type="email" id="from" class="form-control" required name="from" placeholder="From..." />
+									<div class="form-helper"></div>
+									<div class="invalid-feedback">Invalid email.</div>
+								</div>
+							</div>
+							<div class="row mb-4">
+								<div class="col col-sm-12">
+									<input type="text" id="subject" class="form-control" required name="subject" placeholder="Subject..." />
+									<div class="form-helper"></div>
+									<div class="invalid-feedback">Subject is required</div>
+								</div>
+							</div>
+							<div class="row mb-4">
+								<div class="col col-sm-12">
+                                    <textarea class="form-control" name="content" id="content" cols="30" rows="10" required placeholder="Content..."></textarea>
+									<div class="form-helper"></div>
+									<div class="invalid-feedback">Content is required</div>
+								</div>
+							</div>
+
+						</div>
+						<div class="card-footer">
+							<button type="submit" class="btn btn-outline-primary" id="changePasswordBtn">SEND EMAIL</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+		<!-- end -->
+	</div>
+</div>
+
+<script src="/asset/js/site/user/contact.js"></script>
+
+<%- contentFor('pageTitle') %>
+Contact

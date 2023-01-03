@@ -63,7 +63,7 @@ $(function () {
         };
 
         const table = usersTableElement.DataTable({
-            ordering: true,
+            ordering: false,
             searching: false,
             responsive: true,
             processing: true,
@@ -100,7 +100,7 @@ $(function () {
             columnDefs: [
                 {
                     searchable: false,
-                    orderable: true,
+                    orderable: false,
                     width: 200,
                     targets: 0,
                 },
@@ -219,8 +219,8 @@ $(function () {
                 const fileExt = file.name.substring(file.name.lastIndexOf('.') + 1, file.name.length) || file.name; // ex: csv | txt | docx | doc
                 console.log('file ext', fileExt);
                 console.log('file size: ', fileSize);
-                // check if file size is bigger than 2mb
-                if (fileSize > 2097152) {
+                // check if file size is bigger than 4mb (in bytes)
+                if (fileSize > 4194304) {
                     return false;
                 }
                 if (fileExt !== 'csv') {

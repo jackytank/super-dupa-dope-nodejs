@@ -1,24 +1,30 @@
+import { CustomApiResult } from './../../../customTypings/express/index';
 import { Request, Response } from 'express';
 import dayjs from 'dayjs';
 import _ from 'lodash';
 import { UserService } from '../../../services/user.services';
 import { User } from '../../../entities/user.entity';
-import { CustomApiResult } from '../../../customTypings/express';
+import { CustomEntityApiResult } from '../../../customTypings/express';
 import { ROLE } from '../../../constants';
 import { AppDataSource } from '../../../DataSource';
+import process from 'process';
 
 class AdminUserController {
     private userRepo = AppDataSource.getRepository(User);
     private userService = new UserService();
 
     constructor() {
+        this.addPage = this.addPage.bind(this);
+        this.contactPage = this.contactPage.bind(this);
+        this.sendContact = this.sendContact.bind(this);
         this.createNewUser = this.createNewUser.bind(this);
-        this.listPage = this.listPage.bind(this);
         this.editPage = this.editPage.bind(this);
+        this.update = this.update.bind(this);
+        this.listPage = this.listPage.bind(this);
         this.changePassword = this.changePassword.bind(this);
         this.changePasswordPage = this.changePasswordPage.bind(this);
-        this.update = this.update.bind(this);
     }
+    // GET
     async addPage(req: Request, res: Response) {
         const flashMessage = req.flash('message')[0];
         const dataBack = req.flash('dataBack')[0];
@@ -28,6 +34,30 @@ class AdminUserController {
             message: flashMessage
         });
     }
+    // GET
+    async contactPage(req: Request, res: Response) {
+        const flashMessage = req.flash('message')[0];
+        const dataBack = req.flash('dataBack')[0];
+        res.render('admin/contact/index', {
+            activeTab: 'contactTab',
+            dataBack: dataBack ?? {},
+            message: flashMessage
+        });
+    }
+    // POST
+    async sendContact(req: Request, res: Response) {
+        const { from, subject, content } = req.body;
+        const to = process.env.EMAIL_TO ?? 'yijal81745@cnxcoin.com';
+        const sendResult: CustomApiResult = await this.userService.sendEmail({ from, to, subject, content });
+        if (sendResult.status === 200) {
+            req.flash('message', sendResult.message ?? 'Send email success!');
+            req.flash('dataBack', req.body);
+            return res.redirect('/admin/users/contact');
+        }
+        req.flash('message', sendResult.message ?? 'Error when send email!');
+        return res.redirect('/admin/users/contact');
+    }
+    // POST
     async createNewUser(req: Request, res: Response) {
         const queryRunner = AppDataSource.createQueryRunner();
         await queryRunner.connect();
@@ -39,7 +69,7 @@ class AdminUserController {
         });
         user.created_by = req.session.user?.username as string;
         try {
-            const result: CustomApiResult<User> = await this.userService.insertData(user, null, queryRunner, { wantValidate: true, isPasswordHash: true });
+            const result: CustomEntityApiResult<User> = await this.userService.insertData(user, null, queryRunner, { wantValidate: true, isPasswordHash: true });
             if (result.status === 400 || result.status === 500) {
                 await queryRunner.rollbackTransaction();
                 req.flash('message', result.message ?? 'Error when create user!');
@@ -58,9 +88,10 @@ class AdminUserController {
             await queryRunner.release();
         }
     }
+    // GET
     async editPage(req: Request, res: Response) {
         const { id } = req.params;
-        const result: CustomApiResult<User> = await this.userService.getOneData(parseInt(id));
+        const result: CustomEntityApiResult<User> = await this.userService.getOneData(parseInt(id));
         if (result.status === 200) {
             const flashMessage = req.flash('message')[0];
             res.render('admin/users/edit', {
@@ -74,6 +105,7 @@ class AdminUserController {
             res.redirect('/admin/users/list');
         }
     }
+    // POST
     async update(req: Request, res: Response) {
         const queryRunner = AppDataSource.createQueryRunner();
         await queryRunner.connect();
@@ -89,7 +121,7 @@ class AdminUserController {
             }
         }
         try {
-            const result: CustomApiResult<User> = await this.userService.updateData(user, null, queryRunner, { wantValidate: true });
+            const result: CustomEntityApiResult<User> = await this.userService.updateData(user, null, queryRunner, { wantValidate: true });
             if (result.status === 404) {
                 req.flash('message', result.message ?? `Can't find user!`);
                 res.redirect('/admin/users/list');
@@ -105,6 +137,7 @@ class AdminUserController {
             await queryRunner.release();
         }
     }
+    // GET
     async listPage(req: Request, res: Response) {
         const flashMessage = req.flash('message')[0];
         res.render('admin/users/list', {
@@ -114,6 +147,7 @@ class AdminUserController {
             message: flashMessage,
         });
     }
+    // POST
     async changePassword(req: Request, res: Response) {
         const queryRunner = AppDataSource.createQueryRunner();
         await queryRunner.connect();
@@ -121,7 +155,7 @@ class AdminUserController {
         const { id, password } = req.body;
         const user: User = Object.assign(new User(), { id, password });
         try {
-            const result: CustomApiResult<User> = await this.userService.updateData(user, null, queryRunner, { wantValidate: true });
+            const result: CustomEntityApiResult<User> = await this.userService.updateData(user, null, queryRunner, { wantValidate: true });
             if (result.status === 404) {
                 req.flash('message', result.message ?? `Can't find user!`);
             }
@@ -136,6 +170,7 @@ class AdminUserController {
             await queryRunner.release();
         }
     }
+    // GET
     async changePasswordPage(req: Request, res: Response) {
         const id = req.params.id;
         res.render('admin/users/change-password', { userId: id });

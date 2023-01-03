@@ -1,4 +1,4 @@
-import './LoadEnv';
+import './LoadEnv'
 import * as bodyParser from 'body-parser';
 import express from 'express';
 import expressEjsLayouts from 'express-ejs-layouts';

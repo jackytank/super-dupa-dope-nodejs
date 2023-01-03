@@ -7,7 +7,7 @@ import { validate, ValidationError } from 'class-validator';
 import { stringify } from 'csv-stringify';
 import dayjs from 'dayjs';
 import { UserService } from '../../../../services/user.services';
-import { CustomApiResult, CustomValidateResult, } from '../../../../customTypings/express';
+import { CustomEntityApiResult, CustomValidateResult, } from '../../../../customTypings/express';
 import { User } from '../../../../entities/user.entity';
 import { bench, getRandomPassword, isValidDate } from '../../../../utils/common';
 import { UserModel } from '../../../../models/user.model';
@@ -41,7 +41,7 @@ class AdminUserApiController {
     //for routing control purposes - START
     async getAll(req: Request, res: Response) {
         const { take, limit, companyId, companyName } = req.query;
-        let result: CustomApiResult<User>;
+        let result: CustomEntityApiResult<User>;
         if (companyId || companyName) {
             result = await this.userService.getAllDataWithExtraPersonalInfo(req.query);
         } else {
@@ -109,13 +109,13 @@ class AdminUserApiController {
         const queryRunner = AppDataSource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
-        const msgObj: CustomApiResult<User> = { messages: [], status: 500 };
+        const msgObj: CustomEntityApiResult<User> = { messages: [], status: 500 };
         try {
             if (req.file == undefined || req.file.mimetype !== 'text/csv') {
                 return res.status(400).json({ message: 'Please upload a CSV file' });
             }
-            if (req.file.size > (_1MB * 20)) {
-                return res.status(400).json({ message: 'File size cannot be larger than 2MB' });
+            if (req.file.size > (_1MB * 4)) {
+                return res.status(400).json({ message: 'File size cannot be larger than 4MB' });
             }
             const parser = csv.parse({
                 delimiter: ',', // phân cách giữa các cell trong mỗi row
