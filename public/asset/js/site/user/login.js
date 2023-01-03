@@ -13,6 +13,7 @@ $(function () {
      * Form validation
      */
     function init() {
+         // if don't specify the scope (let, const) the variable will be global
         username = $('#username');
         password = $('#password');
         submitBtn = $('#submitBtn');

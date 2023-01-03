@@ -114,7 +114,7 @@ class AdminUserApiController {
             if (req.file == undefined || req.file.mimetype !== 'text/csv') {
                 return res.status(400).json({ message: 'Please upload a CSV file' });
             }
-            if (req.file.size > (_1MB * 2)) {
+            if (req.file.size > (_1MB * 20)) {
                 return res.status(400).json({ message: 'File size cannot be larger than 2MB' });
             }
             const parser = csv.parse({
@@ -133,7 +133,7 @@ class AdminUserApiController {
             const deleteArr: User[] = []; // array of users to delete
             const insertArr: User[] = []; // array of users to insert
             const updateArr: User[] = []; // array of users to update
-            // query data from db first then pass it around to prevent multiple query to db
+            // query data from db first then pass it around to prevent multiple query to db, only select id,username,email for performance reason
             const builder = this.userRepo.createQueryBuilder('user').select(['user.id', 'user.username', 'user.email']);
             if (idRecords.length > 0) {
                 builder.orWhere('user.id IN (:ids)', { ids: idRecords });
@@ -144,11 +144,11 @@ class AdminUserApiController {
             if (emailRecords.length > 0) {
                 builder.orWhere('user.email IN (:emails)', { emails: emailRecords, });
             }
-            const memDbData = await builder.getMany();
-            // iterate csv records data and check row
+            const dbData = await builder.getMany();
             const { start, end } = bench();
             start();
             const startValidateFunc = async () => {
+                // iterate csv records data and check row
                 for (let i = 0; i < records.length; i++) {
                     const row: CsvUserData = records[i] as CsvUserData;
                     const user: User = Object.assign(new User(), {
@@ -158,10 +158,10 @@ class AdminUserApiController {
                         email: row['email'] === '' ? null : row['email'],
                         role: _.isString(row['role']) ? parseInt(row['role']) : row['role'],
                     });
-                    // validate entity User using 'class-validator'
+                    // validate entity User imperatively using 'class-validator'
                     const errors: ValidationError[] = await validate(user);
                     if (errors.length > 0) {
-                        const errMsgStr = errors.map(error => Object.values(error.constraints as { [type: string]: string; },),).join(', ');
+                        const errMsgStr = errors.map(error => Object.values(error.constraints as { [type: string]: string; })).join(', ');
                         msgObj.messages?.push(`Row ${i + 1} : ${errMsgStr}`);
                         continue;
                     }
@@ -172,31 +172,31 @@ class AdminUserApiController {
                             // deleted="y" và colum id không có nhập thì không làm gì hết, ngược lại sẽ xóa row theo id tương ứng dưới DB trong bảng user
                             continue;
                         }
-                        const result: CustomValidateResult<User> = await this.userService.checkUsernameEmailUnique(user, memDbData,);
+                        const result: CustomValidateResult<User> = await this.userService.checkUsernameEmailUnique(user, dbData,);
                         if (result.isValid === false) {
                             msgObj.messages?.push(`Row ${i + 1} : ${result.message}`);
                             continue;
                         }
                         user.password = getRandomPassword();
                         user.created_by = req.session.user?.username as string;
-                        memDbData.push(user); // push to dbData to check unique later
+                        dbData.push(user); // push to dbData to check unique later
                         insertArr.push(user); // push to map to insert later
                     } else {
                         // Trường hợp id có trong db (chứ ko phải trong transaction) => chỉnh sửa user nếu deleted != 'y'
-                        const findUser = _.find(memDbData, { id: user.id });
+                        const findUser = _.find(dbData, { id: user.id });
                         if (findUser) {
                             if (row['deleted'] === 'y') {
-                                memDbData.splice(memDbData.indexOf(findUser), 1); // remove from dbData to check unique later
+                                dbData.splice(dbData.indexOf(findUser), 1); // remove from dbData to check unique later
                                 deleteArr.push(findUser); // push to map to delete later
                             } else {
-                                const result: CustomValidateResult<User> = await this.userService.checkUsernameEmailUnique(user, memDbData,);
+                                const result: CustomValidateResult<User> = await this.userService.checkUsernameEmailUnique(user, dbData,);
                                 if (result.isValid === false) {
                                     msgObj.messages?.push(`Row ${i + 1} : ${result.message}`,);
                                     continue;
                                 }
                                 user.updated_at = new Date();
                                 user.updated_by = req.session.user?.username as string;
-                                memDbData.splice(memDbData.indexOf(result.data as User), 1, result.data as User,); // update dbData to check unique later
+                                dbData.splice(dbData.indexOf(result.data as User), 1, result.data as User,); // update dbData to check unique later
                                 updateArr.push(user); // push to map to update later
                             }
                         } else {
@@ -214,10 +214,10 @@ class AdminUserApiController {
                 deleteArr.map(async user => { await queryRunner.manager.remove<User>(user); }),
             );
             await Promise.all(
-                updateArr.map(async user => { await this.userService.updateData(user, memDbData, queryRunner, { wantValidate: false, }); }),
+                updateArr.map(async user => { await this.userService.updateData(user, dbData, queryRunner, { wantValidate: false, }); }),
             );
             await Promise.all(
-                insertArr.map(async user => { await this.userService.insertData(user, memDbData, queryRunner, { wantValidate: false, isPasswordHash: false, }); }),
+                insertArr.map(async user => { await this.userService.insertData(user, dbData, queryRunner, { wantValidate: false, isPasswordHash: false, }); }),
             );
             // delete, update, insert - END
 
@@ -230,11 +230,7 @@ class AdminUserApiController {
             } else {
                 end();
                 await queryRunner.commitTransaction();
-                return res.status(200).json({
-                    message: 'Import csv file successfully!',
-                    status: 200,
-                    data: records,
-                });
+                return res.status(200).json({ message: 'Import csv file successfully!', status: 200, data: records });
             }
         } catch (error) {
             return res.status(500).json({ messages: ['Internal Server Error'], status: 500 });
@@ -277,30 +273,17 @@ class AdminUserApiController {
             quoted_empty: true,
         }, function (err, data) {
             if (err) {
-                res.status(500).json({
-                    message: 'Internal Server Error\nFailed to export csv',
-                    status: 500,
-                });
+                res.status(500).json({ message: 'Internal Server Error\nFailed to export csv', status: 500 });
             }
             // data = '';
             // if list empty then export only header
             if (data.length === 0) {
                 data = columns_string + '\n';
-                res.status(200).json({
-                    data: data,
-                    status: 200,
-                    message: 'Database is empty!',
-                    filename: filename,
-                });
+                res.status(200).json({ data: data, status: 200, message: 'Database is empty!', filename: filename });
             } else {
                 data = columns_string + '\n' + data;
                 end(); // end count time and log to console
-                res.status(200).json({
-                    data: data,
-                    status: 200,
-                    message: `Export to CSV success!, \nTotal records: ${userList.length}`,
-                    filename: filename,
-                });
+                res.status(200).json({ data: data, status: 200, message: `Export to CSV success!, \nTotal records: ${userList.length}`, filename: filename });
             }
         });
     }

@@ -120,7 +120,7 @@ export const getRandomPassword = () => {
         symbols: true,
         lowercase: true,
         excludeSimilarCharacters: true, // exclude similar characters like 0O1l
-        strict: true, // include all types of characters
+        strict: true, // include all types of characters from options above
     });
 };
 

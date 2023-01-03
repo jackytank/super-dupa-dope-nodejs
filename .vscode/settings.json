@@ -1,0 +1,32 @@
+{
+    "sqltools.connections": [
+        {
+            "mysqlOptions": {
+                "authProtocol": "default"
+            },
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 3306,
+            "driver": "MySQL",
+            "name": "learn-nodejs-briswell",
+            "database": "learn_db",
+            "username": "root",
+            "password": "123123123"
+        },
+        {
+            "mysqlOptions": {
+                "authProtocol": "xprotocol"
+            },
+            "previewLimit": 999999,
+            "server": "localhost",
+            "port": 3306,
+            "driver": "MySQL",
+            "database": "learn_db",
+            "username": "root",
+            "password": "123123123",
+            "name": "hello-mysql",
+            "connectionTimeout": 1000000,
+            "group": "sssss"
+        }
+    ]
+}

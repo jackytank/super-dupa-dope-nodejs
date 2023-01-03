@@ -10,11 +10,10 @@ $(function () {
     });
 
     /**
-     * Init datatable, validation, events
+     * Init, validation, and events
      */
-
-    // init - START
     function init() {
+        // if don't specify the scope (let, const) the variable will be global
         searchFormIdStr = '#searchForm';
         searchForm = $(searchFormIdStr);
         usersTableElement = $('#usersTable');
@@ -32,8 +31,39 @@ $(function () {
         createdDateFrom = $(createdDateFromStr);
         createdDateTo = $(createdDateToStr);
 
+        // utility
+        openErrorModalWithMsg = (modalId, modalMsgId, modalOkBtnId, status, message, messages, wantReload) => {
+            const errorModalEl = document.querySelector(`#${modalId || 'errorModal'}`);
+            const errorModalBodyEl = document.querySelector(`#${modalMsgId || 'errorModalMessage'}`);
+            const errorModalOkBtn = document.querySelector(`#${modalOkBtnId || 'errorModalOkBtn'}`);
+            let _msg = ``;
+            if (message) {
+                _msg = `
+                        <h3>${status || ''}</h3>
+                        <p>${message}</p>
+                     `;
+            }
+
+            if (messages) {
+                _msg = `
+                        <h3>${status || ''}</h3>
+                        <ul class="text-center">
+                            ${messages.map(msg => `<li class="row">${msg}</li>`)}
+                        </ul>
+                    `;
+            }
+            errorModalBodyEl.innerHTML = _msg;
+            const modal = new mdb.Modal(errorModalEl);
+            modal.show();
+            if (wantReload) {
+                errorModalOkBtn.addEventListener('click', () => {
+                    location.reload();
+                });
+            }
+        };
+
         const table = usersTableElement.DataTable({
-            ordering: false,
+            ordering: true,
             searching: false,
             responsive: true,
             processing: true,
@@ -64,13 +94,13 @@ $(function () {
                     d.companyName = companyName;
                 },
                 error: function (xhr, error, code) {
-                    alert('Datatable ajax request error!');
+                    openErrorModalWithMsg(null, null, null, null, 'Datatable AJAX request error!', null, false);
                 }
             },
             columnDefs: [
                 {
                     searchable: false,
-                    orderable: false,
+                    orderable: true,
                     width: 200,
                     targets: 0,
                 },
@@ -177,7 +207,6 @@ $(function () {
             ],
         });
     }
-    // validation - START
     function validation() {
         // add validate methods - START
         $.validator.addMethod(
@@ -238,9 +267,6 @@ $(function () {
             }
         });
     }
-    // validation - END
-
-    // events - START
     function events() {
         // if click del button then call ajax delete request
         $(document).on('click', '#delUserBtn', function () {
@@ -284,43 +310,9 @@ $(function () {
             // wait for 1.2s then enable search button
             setTimeout(() => {
                 searchBtn.attr("disabled", false);
-            }, 350);
+            }, 300);
 
         });
-
-        // $(document).on('click', , function () {
-
-        // });
-
-        const openErrorModalWithMsg = (modalId, modalMsgId, modalOkBtnId, status, message, messages, wantReload) => {
-            const errorModalEl = document.querySelector(`#${modalId}`);
-            const errorModalBodyEl = document.querySelector(`#${modalMsgId}`);
-            const errorModalOkBtn = document.querySelector(`#${modalOkBtnId}`);
-            let _msg = ``;
-            if (message) {
-                _msg = `
-                        <h3>${status || ''}</h3>
-                        <p>${message}</p>
-                     `;
-            }
-
-            if (messages) {
-                _msg = `
-                        <h3>${status || ''}</h3>
-                        <ul class="text-center">
-                            ${messages.map(msg => `<li class="row">${msg}</li>`)}
-                        </ul>
-                    `;
-            }
-            errorModalBodyEl.innerHTML = _msg;
-            const modal = new mdb.Modal(errorModalEl);
-            modal.show();
-            if (wantReload) {
-                errorModalOkBtn.addEventListener('click', () => {
-                    location.reload();
-                });
-            }
-        };
 
         $(document).on('click', '#importCsvBtn', function () {
             if (importCsvFormEl.valid()) {
@@ -338,25 +330,18 @@ $(function () {
                     cache: false,
                     success: function (data) {
                         // location.reload();
-                        openErrorModalWithMsg('errorModal', 'errorModalMessage', 'errorModalOkBtn', data.status, null, data.messages, true);
-                        console.log('Return data: ', JSON.stringify(data, null, 4));
+                        openErrorModalWithMsg('errorModal', 'errorModalMessage', 'errorModalOkBtn', data.status, data.message, data.messages, true);
+                        // console.log('Return data: ', JSON.stringify(data, null, 4));
                     },
                     error: function (req, stat, err) {
                         console.log(req);
-                        openErrorModalWithMsg(
-                            'errorModal',
-                            'errorModalMessage',
-                            'errorModalOkBtn',
-                            req.statusText || req.responseJSON.status,
-                            req.responseJSON.message,
-                            req.responseJSON.messages,
-                            false
+                        openErrorModalWithMsg('errorModal', 'errorModalMessage', 'errorModalOkBtn', req.status || req.responseJSON.status, req.responseJSON.message, req.responseJSON.messages, false
                         );
                     },
                 });
                 document.querySelector('#importCsvForm').reset();
             } else {
-                alert('Please select a valid .csv file and no bigger than 2mb!');
+                openErrorModalWithMsg('errorModal', 'errorModalMessage', 'errorModalOkBtn', null, 'Please select a valid .csv file and no bigger than 2mb!', null, false);
             }
         });
 
@@ -387,5 +372,4 @@ $(function () {
             });
         });
     }
-    // events - END
 });

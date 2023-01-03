@@ -5,12 +5,12 @@
 	<div class="row mb-4">
 		<div class="col-md-6 col-sm-12">
 			<label for="">Name:</label>
-			<input type="text" id="form6Example1" class="form-control" name="name" maxlength="100" placeholder="Name" required <%=userData.name?`value=${userData.name}` : `` %> />
+			<input type="text" id="form6Example1" class="form-control" name="name" minlength="5" maxlength="100" placeholder="Name" required <%=userData.name?`value=${userData.name}` : `` %> />
 			<div class="invalid-feedback">Name is required.</div>
 		</div>
 		<div class="col-md-6 col-sm-12">
 			<label for="">Username:</label>
-			<input type="text" id="form6Example2" class="form-control" name="username" maxlength="255" placeholder="Username" required <%=userData.username? `value=${userData.username}` : `` %> />
+			<input type="text" id="form6Example2" class="form-control" name="username" minlength="5" maxlength="255" placeholder="Username" required <%=userData.username? `value=${userData.username}` : `` %> />
 			<div class="invalid-feedback">Username is required.</div>
 		</div>
 	</div>

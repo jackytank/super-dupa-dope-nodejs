@@ -18,7 +18,7 @@ export const userExpressValidationRule = (options: { hasRetype: boolean; hasPass
             .custom((value, { req }) => {
                 return blackListWords.some((word) => value.includes(word)) ? false : true;
             }).withMessage(errMsg.ERR008('name'))
-            .isLength({ max: 100 })
+            .isLength({ min: 5, max: 100 }).withMessage(errMsg.ERR009('name', 5))
             .not()
             .isEmpty().withMessage(errMsg.ERR001('name'))
             .trim(),
@@ -29,7 +29,7 @@ export const userExpressValidationRule = (options: { hasRetype: boolean; hasPass
             .custom((value, { req }) => {
                 return blackListWords.some((word) => value.includes(word)) ? false : true;
             }).withMessage(errMsg.ERR008('username'))
-            .isLength({ max: 255 })
+            .isLength({ min: 5, max: 255 }).withMessage(errMsg.ERR009('username', 5))
             .not()
             .isEmpty().withMessage(errMsg.ERR001('username'))
             .trim(),
@@ -44,9 +44,9 @@ export const userExpressValidationRule = (options: { hasRetype: boolean; hasPass
                 return DOMPurify.sanitize(value);
             })
             .isLength({ max: 255 })
+            .normalizeEmail() // Ex: @gMaiL.CoM -> @gmail.com, lowercase domain part because it case-insensitive
             .isEmail().withMessage(errMsg.ERR003('email'))
-            .trim()
-            .normalizeEmail(), // Ex: @gMaiL.CoM -> @gmail.com, lowercase domain part because it case-insensitive
+            .trim(),
         body('role')
             .isIn(Object.values(UserRole).concat(Object.values(UserRole).map((n) => n + "")))  // Ex: [1, 2, 3, '1', '2', '3']
             .withMessage(errMsg.ERR003('role')),
@@ -82,7 +82,7 @@ const extractErrors = (req: Request) => {
 };
 /**
  * 
- * @returns if no error then call next() else redirect to the same page with flash message and dataBack
+ * @returns if no error then call next() else redirect to the same page (GET) with flash message and dataBack
  */
 export const expressValidateUser = (req: Request, res: Response, next: NextFunction) => {
     const errorsList = extractErrors(req);

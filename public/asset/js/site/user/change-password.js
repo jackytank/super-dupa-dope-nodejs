@@ -13,6 +13,7 @@ $(function () {
      * Form validation
      */
     function init() {
+         // if don't specify the scope (let, const) the variable will be global
         formIdStr = '#changePasswordForm';
         submitIdBtnStr = '#changePasswordBtn'
         formElement = $(formIdStr);

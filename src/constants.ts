@@ -15,6 +15,8 @@ export const titleMessageError = {
     NOT_FOUND: 'TITLE NOT FOUND',
     INTERNAL_SERVER_ERROR: 'Internal Server Error',
     FORBIDDEN: 'Forbidden, access denied.',
+    BAD_REQUEST: 'Bad Request',
+    LIMIT_REQUEST: 'Limit Request',
 };
 
 export interface IMessage {
@@ -50,11 +52,11 @@ export const messages = {
 
 // tri - my own custom constants - START
 export const errMsg = {
-    ERR001: (column: string) => {
-        return `${column.toUpperCase()} is required!`;
+    ERR001: (field: string) => {
+        return `${field.toUpperCase()} is required!`;
     },
-    ERR002: (column: string, minLength: number, maxLength: number) => {
-        return `${column.toUpperCase()} should be more than ${minLength}, less than equal to ${maxLength} characters`;
+    ERR002: (field: string, minLength: number, maxLength: number) => {
+        return `${field.toUpperCase()} should be more than ${minLength}, less than equal to ${maxLength} characters`;
     },
     ERR003: (email: string) => {
         return `${email.toUpperCase()} is invalid!`;
@@ -74,6 +76,9 @@ export const errMsg = {
     ERR008: (field: string) => {
         return `${field.toUpperCase()} is contains blacklisted words`;
     },
+    ERR009: (field: string, minLength: number) => {
+        return `${field.toUpperCase()} should be more than ${minLength} characters`;
+    }
 };
 
 export const _1MB = 1024 * 1024;
