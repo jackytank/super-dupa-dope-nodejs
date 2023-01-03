@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { rateLimit } from "express-rate-limit";
 import { titleMessageError } from "../constants";
+import logger from "../winston";
 
 const FOR_PAGE = {
     API: {
@@ -10,7 +11,7 @@ const FOR_PAGE = {
     },
     LOGIN: {
         window: 60 * 60 * 1000, // 1 hour
-        max: 20,
+        max: 1,
         get message() { return `You have reached the max ${this.max} number of login requests. Please try again later after 15 minutes.`; },
     },
     REGISTER: {
@@ -27,6 +28,7 @@ export const apiLimiter = rateLimit({
     legacyHeaders: false,
     message: FOR_PAGE.API.message,
     handler: (req: Request, res: Response, next: NextFunction, options) => {
+        logger.warn(`[RateLimiter] ${req.ip} - ${req.method} - ${req.originalUrl} - ${options.message}`);
         res.status(429).json({ status: options.statusCode, message: options.message });
     }
 });
@@ -38,6 +40,7 @@ export const createUserLimiter = rateLimit({
     legacyHeaders: false,
     message: FOR_PAGE.REGISTER.message,
     handler: (req: Request, res: Response, next: NextFunction, options) => {
+        logger.warn(`[RateLimiter] ${req.ip} - ${req.method} - ${req.originalUrl} - ${options.message}`);
         res.render('errors/index', {
             layout: 'layout/noLoginLayout',
             title: titleMessageError.LIMIT_REQUEST,
@@ -52,6 +55,7 @@ export const loginLimiter = rateLimit({
     legacyHeaders: false,
     message: FOR_PAGE.LOGIN.message,
     handler: (req: Request, res: Response, next: NextFunction, options) => {
+        logger.warn(`[RateLimiter] ${req.ip} - ${req.method} - ${req.originalUrl} - ${options.message}`);
         res.render('errors/index', {
             layout: 'layout/noLoginLayout',
             title: titleMessageError.LIMIT_REQUEST,
